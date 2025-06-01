@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>{{ titulo_pagina if titulo_pagina else "Relatório de Consumo por Item Específico" }}</h2>
+    <p class="text-muted">Selecione o Item da Ata específico e, opcionalmente, um período para gerar o relatório de consumo.</p>
+    <hr class="my-4">
+
+    <form method="POST" action="" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="row">
+            <div class="col-md-8 mb-3"> {# Campo de Item pode ser mais largo #}
+                {{ form.item_ata_id.label(class="form-label") }}
+                {{ form.item_ata_id(class="form-select" + (" is-invalid" if form.item_ata_id.errors else "")) }}
+                {% if form.item_ata_id.errors %}
+                    <div class="invalid-feedback d-block">
+                        {% for error in form.item_ata_id.errors %}<span>{{ error }}</span><br>{% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                {{ form.data_inicio.label(class="form-label") }}
+                {{ form.data_inicio(class="form-control" + (" is-invalid" if form.data_inicio.errors else "")) }}
+                {% if form.data_inicio.errors %}
+                    <div class="invalid-feedback d-block">
+                        {% for error in form.data_inicio.errors %}<span>{{ error }}</span><br>{% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="col-md-6 mb-3">
+                {{ form.data_fim.label(class="form-label") }}
+                {{ form.data_fim(class="form-control" + (" is-invalid" if form.data_fim.errors else "")) }}
+                {% if form.data_fim.errors %}
+                    <div class="invalid-feedback d-block">
+                        {% for error in form.data_fim.errors %}<span>{{ error }}</span><br>{% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            {{ form.submit(class="btn btn-primary") }}
+            {# O link de cancelar pode voltar para o dashboard ou para a lista de relatórios, se houver #}
+            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary ms-2">Cancelar</a> 
+        </div>
+    </form>
+{% endblock %}

@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>{{ titulo_pagina if titulo_pagina else "Criar Novo Contrato Clássico" }}</h2>
+    <hr class="my-4">
+    <form method="POST" action="" novalidate id="formContratoClassico">
+        {{ form.hidden_tag() }}
+
+        <div class="mb-3">
+            {{ form.numero_contrato.label(class="form-label") }}
+            {{ form.numero_contrato(class="form-control" + (" is-invalid" if form.numero_contrato.errors else "")) }}
+            {% if form.numero_contrato.errors %}<div class="invalid-feedback d-block">{% for error in form.numero_contrato.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.objeto.label(class="form-label") }}
+            {{ form.objeto(class="form-control" + (" is-invalid" if form.objeto.errors else ""), rows="3") }}
+            {% if form.objeto.errors %}<div class="invalid-feedback d-block">{% for error in form.objeto.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                {{ form.valor_global_contrato.label(class="form-label") }}
+                {{ form.valor_global_contrato(class="form-control" + (" is-invalid" if form.valor_global_contrato.errors else "")) }}
+                {% if form.valor_global_contrato.errors %}<div class="invalid-feedback d-block">{% for error in form.valor_global_contrato.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+            </div>
+            <div class="col-md-6 mb-3">
+                {{ form.fornecedor.label(class="form-label") }}
+                {{ form.fornecedor(class="form-control" + (" is-invalid" if form.fornecedor.errors else "")) }}
+                {% if form.fornecedor.errors %}<div class="invalid-feedback d-block">{% for error in form.fornecedor.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                {{ form.data_assinatura_contrato.label(class="form-label") }}
+                {{ form.data_assinatura_contrato(class="form-control" + (" is-invalid" if form.data_assinatura_contrato.errors else "")) }}
+                {% if form.data_assinatura_contrato.errors %}<div class="invalid-feedback d-block">{% for error in form.data_assinatura_contrato.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+            </div>
+            <div class="col-md-4 mb-3">
+                {{ form.data_inicio_vigencia.label(class="form-label") }}
+                {{ form.data_inicio_vigencia(class="form-control" + (" is-invalid" if form.data_inicio_vigencia.errors else "")) }}
+                {% if form.data_inicio_vigencia.errors %}<div class="invalid-feedback d-block">{% for error in form.data_inicio_vigencia.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+            </div>
+            <div class="col-md-4 mb-3">
+                {{ form.data_fim_vigencia.label(class="form-label") }}
+                {{ form.data_fim_vigencia(class="form-control" + (" is-invalid" if form.data_fim_vigencia.errors else "")) }}
+                {% if form.data_fim_vigencia.errors %}<div class="invalid-feedback d-block">{% for error in form.data_fim_vigencia.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+            </div>
+        </div>
+
+        <hr class="my-3">
+        <h5>Itens do Contrato (Opcional - Entrada Livre)</h5>
+        
+        <div id="itens-contratados-container">
+            {% for item_contratado_entry in form.itens_contratados %}
+                <div class="item-contratado-bloco mb-4 p-3 border rounded">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0 item-contrato-titulo">Item {{ loop.index }}</h6>
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-item-contrato-btn">Remover</button>
+                    </div>
+                    <hr class="mt-2 mb-3">
+                    
+                    <div class="mb-3">
+                        {{ item_contratado_entry.form.descricao.label(class="form-label") }}
+                        {{ item_contratado_entry.form.descricao(class="form-control" + (" is-invalid" if item_contratado_entry.form.descricao.errors else "")) }}
+                        {% if item_contratado_entry.form.descricao.errors %}<div class="invalid-feedback d-block">{% for error in item_contratado_entry.form.descricao.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            {{ item_contratado_entry.form.unidade_medida.label(class="form-label") }}
+                            {{ item_contratado_entry.form.unidade_medida(class="form-control" + (" is-invalid" if item_contratado_entry.form.unidade_medida.errors else ""), placeholder="Un, Kg, Cx...") }}
+                            {% if item_contratado_entry.form.unidade_medida.errors %}<div class="invalid-feedback d-block">{% for error in item_contratado_entry.form.unidade_medida.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            {{ item_contratado_entry.form.quantidade.label(class="form-label") }}
+                            {{ item_contratado_entry.form.quantidade(class="form-control" + (" is-invalid" if item_contratado_entry.form.quantidade.errors else ""), type="number", step="any", placeholder="0.00") }}
+                            {% if item_contratado_entry.form.quantidade.errors %}<div class="invalid-feedback d-block">{% for error in item_contratado_entry.form.quantidade.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            {{ item_contratado_entry.form.valor_unitario.label(class="form-label") }}
+                            {{ item_contratado_entry.form.valor_unitario(class="form-control" + (" is-invalid" if item_contratado_entry.form.valor_unitario.errors else ""), type="number", step="0.01", placeholder="0.00") }}
+                            {% if item_contratado_entry.form.valor_unitario.errors %}<div class="invalid-feedback d-block">{% for error in item_contratado_entry.form.valor_unitario.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <button type="button" id="add-item-contrato-btn" class="btn btn-outline-success btn-sm mt-2 mb-3">
+             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
+            Adicionar Item ao Contrato
+        </button>
+
+        <div class="mt-4">
+            {{ form.submit(class="btn btn-primary") }}
+            <a href="{{ url_for('listar_contratos') }}" class="btn btn-secondary ms-2">Cancelar</a>
+        </div>
+    </form>
+
+    <div id="item-contrato-template" style="display: none;">
+        <div class="item-contratado-bloco mb-4 p-3 border rounded">
+             <div class="d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 item-contrato-titulo">Novo Item</h6>
+                <button type="button" class="btn btn-sm btn-outline-danger remove-item-contrato-btn">Remover</button>
+            </div>
+            <hr class="mt-2 mb-3">
+            <div class="mb-3">
+                <label class="form-label" for="itens_contratados-__prefix__-descricao">Descrição do Item</label>
+                <input class="form-control" id="itens_contratados-__prefix__-descricao" name="itens_contratados-__prefix__-descricao" type="text" value="">
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label" for="itens_contratados-__prefix__-unidade_medida">Unidade</label>
+                    <input class="form-control" id="itens_contratados-__prefix__-unidade_medida" name="itens_contratados-__prefix__-unidade_medida" type="text" value="" placeholder="Un, Kg, Cx...">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label" for="itens_contratados-__prefix__-quantidade">Quantidade</label>
+                    <input class="form-control" id="itens_contratados-__prefix__-quantidade" name="itens_contratados-__prefix__-quantidade" step="any" type="number" value="" placeholder="0.00">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label" for="itens_contratados-__prefix__-valor_unitario">Valor Unitário (R$)</label>
+                    <input class="form-control" id="itens_contratados-__prefix__-valor_unitario" name="itens_contratados-__prefix__-valor_unitario" step="0.01" type="number" value="" placeholder="0.00">
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const formContrato = document.getElementById('formContratoClassico');
+    if (!formContrato) {
+        // console.log("Formulário de Contrato Clássico não encontrado nesta página.");
+        return; 
+    }
+
+    const itensContainer = document.getElementById('itens-contratados-container');
+    const addItemBtn = document.getElementById('add-item-contrato-btn');
+    const itemTemplateDiv = document.getElementById('item-contrato-template');
+    
+    if (!itensContainer || !addItemBtn || !itemTemplateDiv) {
+        console.error('CONTRATO CLÁSSICO: Elementos cruciais para itens dinâmicos (container, botão de adicionar ou template) não encontrados.');
+        return;
+    }
+    const itemTemplateHtml = itemTemplateDiv.innerHTML;
+    const fieldListName = 'itens_contratados'; // Nome do FieldList no formulário Python
+    const itemBlocoClass = 'item-contratado-bloco'; // Classe da div que envolve cada item
+    const removeBtnClass = 'remove-item-contrato-btn'; // Classe do botão de remover
+    const itemTituloClass = 'item-contrato-titulo'; // Classe do h6 que mostra o número do item
+
+    let nextItemIndex = itensContainer.querySelectorAll('.' + itemBlocoClass).length;
+
+    // Função para atualizar os títulos (ex: "Item 1", "Item 2") e os índices dos campos
+    function renumerarItens() {
+        const blocos = itensContainer.querySelectorAll('.' + itemBlocoClass);
+        blocos.forEach((bloco, idx) => {
+            // Atualiza o título do item
+            const titulo = bloco.querySelector('.' + itemTituloClass);
+            if (titulo) {
+                titulo.textContent = `Item ${idx + 1}`;
+            }
+            // Re-indexa os campos do formulário (name, id)
+            bloco.querySelectorAll('input, select, textarea').forEach(input => {
+                if (input.name) {
+                    input.name = input.name.replace(new RegExp(`${fieldListName}-\\d+-`), `${fieldListName}-${idx}-`);
+                }
+                if (input.id) {
+                    input.id = input.id.replace(new RegExp(`${fieldListName}-\\d+-`), `${fieldListName}-${idx}-`);
+                }
+            });
+        });
+        nextItemIndex = blocos.length; // Atualiza o próximo índice a ser usado
+    }
+
+    // Função para configurar o botão de remover para um bloco de item
+    function configurarBotaoRemover(blocoItem) {
+        const removeButton = blocoItem.querySelector('.' + removeBtnClass);
+        if (removeButton) {
+            // Remove listener antigo para evitar duplicação, clonando o botão
+            const newRemoveButton = removeButton.cloneNode(true);
+            removeButton.parentNode.replaceChild(newRemoveButton, newRemoveButton);
+
+            newRemoveButton.addEventListener('click', function() {
+                blocoItem.remove();
+                renumerarItens(); // Renumera e re-indexa após remover
+                // Para Contratos, min_entries é 0, então não há restrição de remoção do último item.
+            });
+        }
+    }
+
+    // Adicionar novo item
+    addItemBtn.addEventListener('click', function() {
+        const novoItemHtmlMarcado = itemTemplateHtml.replace(/__prefix__/g, nextItemIndex);
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = novoItemHtmlMarcado;
+        const novoItemBloco = tempDiv.firstElementChild;
+
+        if (novoItemBloco) {
+            itensContainer.appendChild(novoItemBloco);
+            configurarBotaoRemover(novoItemBloco); // Configura o botão de remover para o novo item
+            renumerarItens(); // Atualiza títulos e índices
+            nextItemIndex++; // Incrementa para o próximo item
+        } else {
+            console.error("CONTRATO CLÁSSICO: Erro ao criar novo bloco de item a partir do template.");
+        }
+    });
+
+    // Configurar botões de remover para itens já existentes na página (caso de edição ou erro de validação)
+    itensContainer.querySelectorAll('.' + itemBlocoClass).forEach(blocoExistente => {
+        configurarBotaoRemover(blocoExistente);
+    });
+    
+    renumerarItens(); // Garante que a numeração inicial esteja correta
+});
+</script>
+{% endblock %}

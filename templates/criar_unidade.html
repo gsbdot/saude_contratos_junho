@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>{{ titulo_pagina if titulo_pagina else "Cadastrar Nova Unidade de Saúde" }}</h2>
+    <hr class="my-4">
+    <form method="POST" action="" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="mb-3">
+            {{ form.nome_unidade.label(class="form-label") }}
+            {{ form.nome_unidade(class="form-control" + (" is-invalid" if form.nome_unidade.errors else "")) }}
+            {% if form.nome_unidade.errors %}<div class="invalid-feedback d-block">{% for error in form.nome_unidade.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.tipo_unidade.label(class="form-label") }}
+            {{ form.tipo_unidade(class="form-select" + (" is-invalid" if form.tipo_unidade.errors else "")) }}
+            {% if form.tipo_unidade.errors %}<div class="invalid-feedback d-block">{% for error in form.tipo_unidade.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.endereco.label(class="form-label") }}
+            {{ form.endereco(class="form-control" + (" is-invalid" if form.endereco.errors else "")) }}
+            {% if form.endereco.errors %}<div class="invalid-feedback d-block">{% for error in form.endereco.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                {{ form.telefone.label(class="form-label") }}
+                {{ form.telefone(class="form-control" + (" is-invalid" if form.telefone.errors else "")) }}
+                {% if form.telefone.errors %}<div class="invalid-feedback d-block">{% for error in form.telefone.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+            </div>
+            <div class="col-md-6 mb-3">
+                {{ form.email_responsavel.label(class="form-label") }}
+                {{ form.email_responsavel(class="form-control" + (" is-invalid" if form.email_responsavel.errors else "")) }}
+                {% if form.email_responsavel.errors %}<div class="invalid-feedback d-block">{% for error in form.email_responsavel.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            {{ form.submit(class="btn btn-primary") }}
+            <a href="{{ url_for('listar_unidades') }}" class="btn btn-secondary ms-2">Cancelar</a>
+        </div>
+    </form>
+{% endblock %}

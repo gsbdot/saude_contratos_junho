@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>{{ titulo_pagina }}</h2>
+        <div>
+            <a href="{{ url_for('editar_contrato', contrato_id=contrato.id) }}" class="btn btn-primary btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16"><path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/><path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/></svg>
+                Editar
+            </a>
+            <a href="{{ url_for('listar_contratos') }}" class="btn btn-secondary btn-sm ms-2">Voltar para Lista</a>
+        </div>
+    </div>
+    <hr class="my-4">
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Dados do Contrato Clássico</h4>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Número do Contrato:</dt>
+                <dd class="col-sm-9">{{ contrato.numero_contrato }}</dd>
+
+                <dt class="col-sm-3">Objeto:</dt>
+                <dd class="col-sm-9">{{ contrato.objeto|default('N/A', True) }}</dd>
+
+                <dt class="col-sm-3">Fornecedor:</dt>
+                <dd class="col-sm-9">{{ contrato.fornecedor|default('N/A', True) }}</dd>
+
+                <dt class="col-sm-3">Data de Assinatura:</dt>
+                <dd class="col-sm-9">{{ contrato.data_assinatura_contrato.strftime('%d/%m/%Y') if contrato.data_assinatura_contrato else '-' }}</dd>
+                
+                <dt class="col-sm-3">Início da Vigência:</dt>
+                <dd class="col-sm-9">{{ contrato.data_inicio_vigencia.strftime('%d/%m/%Y') if contrato.data_inicio_vigencia else '-' }}</dd>
+
+                <dt class="col-sm-3">Fim da Vigência:</dt>
+                <dd class="col-sm-9">{{ contrato.data_fim_vigencia.strftime('%d/%m/%Y') if contrato.data_fim_vigencia else '-' }}</dd>
+
+                <dt class="col-sm-3">Valor Global do Contrato:</dt>
+                <dd class="col-sm-9">{{ contrato.valor_global_contrato | br_currency }}</dd>
+
+                <dt class="col-sm-3">Valor Total dos Itens Livres:</dt>
+                <dd class="col-sm-9">{{ contrato.valor_total_itens | br_currency }}</dd>
+            </dl>
+        </div>
+    </div>
+
+    {% if contrato.itens_do_contrato and contrato.itens_do_contrato.count() > 0 %}
+    <div class="card">
+        <div class="card-header">
+            <h4>Itens Livres do Contrato</h4>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover table-sm mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Descrição do Item</th>
+                            <th>Unidade</th>
+                            <th class="text-end">Quantidade</th>
+                            <th class="text-end">Valor Unitário</th>
+                            <th class="text-end">Valor Total do Item</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item_livre in contrato.itens_do_contrato %}
+                        <tr>
+                            <td>{{ item_livre.descricao }}</td>
+                            <td>{{ item_livre.unidade_medida|default('-', True) }}</td>
+                            <td class="text-end">{{ item_livre.quantidade | format_quantity }}</td>
+                            <td class="text-end">{{ item_livre.valor_unitario | br_currency }}</td>
+                            <td class="text-end">{{ item_livre.valor_total_item | br_currency }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">Nenhum item livre registrado para este contrato.</div>
+    {% endif %}
+
+{% endblock %}

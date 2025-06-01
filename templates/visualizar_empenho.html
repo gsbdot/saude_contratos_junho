@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>{{ titulo_pagina if titulo_pagina else "Detalhes do Empenho" }}</h2>
+        <div>
+            <a href="{{ url_for('editar_empenho', empenho_id=empenho.id) }}" class="btn btn-primary btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16"><path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/><path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/></svg>
+                Editar
+            </a>
+            {# Futuramente, botão para PDF do Empenho específico aqui #}
+            <a href="{{ url_for('listar_empenhos') }}" class="btn btn-secondary btn-sm ms-2">Voltar para Lista</a>
+        </div>
+    </div>
+    <hr class="my-4">
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Dados do Empenho</h4>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Número do Empenho:</dt>
+                <dd class="col-sm-9">{{ empenho.numero_empenho }}</dd>
+
+                <dt class="col-sm-3">Descrição Simplificada:</dt>
+                <dd class="col-sm-9">{{ empenho.descricao_simples|default('N/A', True) }}</dd>
+
+                <dt class="col-sm-3">Favorecido:</dt>
+                <dd class="col-sm-9">{{ empenho.favorecido|default('N/A', True) }}</dd>
+
+                <dt class="col-sm-3">Data de Emissão:</dt>
+                <dd class="col-sm-9">{{ empenho.data_emissao.strftime('%d/%m/%Y') if empenho.data_emissao else '-' }}</dd>
+                
+                <dt class="col-sm-3">Ata Vinculada:</dt>
+                <dd class="col-sm-9">
+                    {% if empenho.ata_vinculada %}
+                        <a href="{{ url_for('listar_itens_da_ata', ata_id=empenho.ata_vinculada.id) }}">{{ empenho.ata_vinculada.numero_ata }}/{{ empenho.ata_vinculada.ano }}</a>
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </dd>
+
+                <dt class="col-sm-3">Unidade de Saúde Destino:</dt>
+                <dd class="col-sm-9">{{ empenho.unidade_saude_solicitante.nome_unidade if empenho.unidade_saude_solicitante else 'N/A' }}</dd>
+
+                <dt class="col-sm-3">Valor Total Manual:</dt>
+                <dd class="col-sm-9">{{ empenho.valor_total_manual | br_currency }}</dd>
+
+                <dt class="col-sm-3">Valor Total dos Itens Consumidos:</dt>
+                <dd class="col-sm-9">{{ empenho.valor_total_itens | br_currency }}</dd>
+            </dl>
+        </div>
+    </div>
+
+    {% if empenho.itens_consumidos and empenho.itens_consumidos.count() > 0 %}
+    <div class="card">
+        <div class="card-header">
+            <h4>Itens Consumidos</h4>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover table-sm mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Item da Ata</th>
+                            <th>Tipo</th>
+                            <th>Unidade</th>
+                            <th class="text-end">Qtd. Consumida</th>
+                            <th class="text-end">Vlr. Unit. (Consumo)</th>
+                            <th class="text-end">Vlr. Total Item</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for consumo in empenho.itens_consumidos %}
+                        <tr>
+                            <td>{{ consumo.item_ata_consumido.descricao_item }}</td>
+                            <td>{{ tipo_item_display_map.get(consumo.item_ata_consumido.tipo_item, consumo.item_ata_consumido.tipo_item) }}</td>
+                            <td>{{ consumo.item_ata_consumido.unidade_medida|default('-', True) }}</td>
+                            <td class="text-end">{{ consumo.quantidade_consumida | format_quantity }}</td>
+                            <td class="text-end">{{ consumo.valor_unitario_no_consumo | br_currency }}</td>
+                            <td class="text-end">{{ consumo.valor_total_consumido_item | br_currency }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">Nenhum item consumido registrado para este empenho.</div>
+    {% endif %}
+
+{% endblock %}
