@@ -1,0 +1,50 @@
+{# templates/_comentarios.html #}
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h4><i class="fas fa-comments"></i> Comentários / Post-its</h4>
+    </div>
+    <div class="card-body">
+        {% if documento.comments and documento.comments.count() > 0 %}
+            <div class="mb-3" style="max-height: 400px; overflow-y: auto; padding-right: 15px;">
+                {% for comment in documento.comments %}
+                <div class="d-flex mb-3">
+                    <div class="flex-shrink-0 me-3">
+                        <i class="fas fa-user-circle fa-2x text-secondary"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between">
+                            <h6 class="mt-0 mb-1 fw-bold">{{ comment.author.username }}</h6>
+                            <small class="text-muted">{{ comment.timestamp.strftime('%d/%m/%Y %H:%M') }}</small>
+                        </div>
+                        {# A tag <pre> preserva quebras de linha e espaços #}
+                        <pre class="mb-0 font-monospace bg-light p-2 rounded" style="white-space: pre-wrap; font-size: 0.9em;">{{ comment.content }}</pre>
+                    </div>
+                </div>
+                {% if not loop.last %}<hr class="my-2">{% endif %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-muted fst-italic">Nenhum comentário adicionado a este documento ainda.</p>
+        {% endif %}
+
+        <hr>
+
+        <h5 class="mt-3">Adicionar um novo "Post-it"</h5>
+        <form method="POST" action="{{ url_for('adicionar_comentario', doc_tipo=documento.__class__.__name__, doc_id=documento.id) }}" novalidate>
+            {{ comment_form.hidden_tag() }}
+            <div class="mb-2">
+                {{ comment_form.content.label(class="form-label visually-hidden") }}
+                {{ comment_form.content(class="form-control" + (" is-invalid" if comment_form.content.errors else ""), rows="3", placeholder="Digite seu comentário aqui...") }}
+                {% if comment_form.content.errors %}
+                    <div class="invalid-feedback d-block">
+                        {% for error in comment_form.content.errors %}<span>{{ error }}</span><br>{% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="text-end">
+                {{ comment_form.submit(class="btn btn-success btn-sm") }}
+            </div>
+        </form>
+    </div>
+</div>

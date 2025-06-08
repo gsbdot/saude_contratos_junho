@@ -6,121 +6,107 @@
     <title>{{ titulo_pagina|default("SGC Saúde") }} - Nova Friburgo</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
-        body { padding-top: 70px; /* Ajuste para navbar fixa no topo */ background-color: #f8f9fa; font-family: sans-serif; color: #333;}
-        .footer { background-color: #343a40; color: white; padding: 20px 0; margin-top: 30px; font-size: 0.9em;}
-        .table-actions a { margin-right: 5px; }
-        .card-counter {
-            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-            padding: 20px; margin: 10px; border-radius: 5px; text-align: center; background-color: #fff;
+        body {
+            padding-top: 70px;
+            padding-bottom: 60px; 
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
-        .card-counter .count-numbers { font-size: 2.5em; font-weight: bold; }
-        .card-counter .count-name { font-size: 1em; color: #6c757d; }
-        .navbar-dark .navbar-nav .nav-link.active, .navbar-dark .navbar-nav .show>.nav-link {
-            font-weight: bold; /* Destaca o link ativo */
+        main.container {
+            flex: 1;
         }
-        table { width: 98%; margin-top: 20px; border-collapse: collapse; margin-left: auto; margin-right: auto; font-size: 0.9em; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        th, td { border: 1px solid #ddd; text-align: left; padding: 10px; vertical-align: middle; }
-        th { background-color: #e9ecef; color: #495057; }
-        tr:nth-child(even) { background-color: #f9f9f9; }
-        .messages { padding: 0; list-style: none; margin-bottom: 15px; }
-        .alert { padding: 15px; margin-bottom: 10px; border: 1px solid transparent; border-radius: 4px; text-align: center; }
-        .alert-success { color: #0f5132; background-color: #d1e7dd; border-color: #badbcc; }
-        .alert-danger { color: #842029; background-color: #f8d7da; border-color: #f5c2c7; }
-        .alert-warning { color: #664d03; background-color: #fff3cd; border-color: #ffecb5; }
-        .alert-info { color: #055160; background-color: #cff4fc; border-color: #b6effb; }
-        .container { width: 95%; max-width: 1500px; margin: 20px auto; padding: 25px; background-color: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); min-height: 75vh;}
-        header { text-align: center; padding: 0; background-color: #0056b3; color: white; } 
-        header h1 { margin: 0; font-size: 1.8em; padding-top: 10px;}
-        nav.navbar { padding-top: 0.25rem; padding-bottom: 0.25rem; } 
-        nav ul { list-style-type: none; padding: 5px 0; text-align: center; margin-top:0px; margin-bottom:0px; background-color: #004085; } 
-        nav ul li { display: inline; margin: 0 15px; }
-        nav ul li a { color: #e9ecef; text-decoration: none; font-weight: bold; font-size: 1.0em; } 
-        nav ul li a:hover, nav ul li a.active { color: #fff; }
-        form .mb-3 { margin-bottom: 1rem !important; }
-        form label.form-label { display: block; margin-bottom: .5rem; font-weight: bold; }
-        form .form-control, form .form-select {
-            width: 100%; padding: .5rem .75rem; margin-bottom: .25rem; 
-            border: 1px solid #ced4da; border-radius: .25rem; box-sizing: border-box;
-            font-size: 0.9rem; line-height: 1.5; 
+        .footer {
+            background-color: #f8f9fa;
+            border-top: 1px solid #e7e7e7;
+            padding: 20px 0;
+            width: 100%;
         }
-        form .form-check-input { margin-top: .3rem; margin-left: 0; margin-right: .5rem;}
-        form .form-check-label { font-weight: normal; }
-        form input[type="submit"], .btn { 
-            padding: .5rem 1rem; border: none; border-radius: .25rem; cursor: pointer; font-size: 1rem; text-decoration: none; display: inline-block; margin-top: 10px; line-height: 1.5;
+        .table-actions a {
+            margin: 0 2px;
         }
-        .btn-sm { padding: .25rem .5rem; font-size: .875rem; border-radius: .2rem; } 
-        
-        .btn-primary { background-color: #0d6efd; color: white; }
-        .btn-primary:hover { background-color: #0b5ed7; }
-        .btn-secondary { background-color: #6c757d; color: white; }
-        .btn-secondary:hover { background-color: #5c636a; }
-        .btn-success { background-color: #198754; color: white; }
-        .btn-success:hover { background-color: #157347; }
-        .btn-danger { background-color: #dc3545; color: white; }
-        .btn-danger:hover { background-color: #bb2d3b; }
-        .btn-warning { background-color: #ffc107; color: black; }
-        .btn-warning:hover { background-color: #ffca2c; }
-        .btn-info { background-color: #0dcaf0; color: black; }
-        .btn-info:hover { background-color: #31d2f2; }
-        .btn-outline-primary { border-color: #0d6efd; color:#0d6efd }
-        .btn-outline-primary:hover { background-color: #0d6efd; color:white }
-        .btn-outline-danger { border-color: #dc3545; color:#dc3545 }
-        .btn-outline-danger:hover { background-color: #dc3545; color:white }
-        .btn-outline-info { border-color: #0dcaf0; color:#0dcaf0 }
-        .btn-outline-info:hover { background-color: #0dcaf0; color:white }
-
-        .invalid-feedback.d-block { font-size: .875em; color: #dc3545; }
-        h2, h3, h4, h5 { color: #0056b3; margin-top: 1.5rem; margin-bottom: 1rem;}
-        hr { border: 0; height: 1px; background-color: #dee2e6; margin: 2rem 0; }
     </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
         <div class="container-fluid">
-            <a class="navbar-brand" href="{{ url_for('dashboard') }}">SGC-Saúde NF</a>
+            <a class="navbar-brand" href="{{ url_for('dashboard') }}">
+                <i class="fas fa-file-signature"></i> SGC-Saúde NF
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                {% if current_user.is_authenticated %}
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">Dashboard</a>
+                        <a class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'index' or request.endpoint.startswith('criar_ata') or request.endpoint.startswith('editar_ata') or request.endpoint.startswith('listar_itens_da_ata') %}active{% endif %}" href="{{ url_for('index') }}">Atas</a>
+                        <a class="nav-link {% if request.endpoint.startswith('ata') or request.endpoint == 'index' or request.endpoint.startswith('listar_itens') %}active{% endif %}" href="{{ url_for('index') }}">
+                            <i class="fas fa-file-alt"></i> Atas
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'listar_contratos' or request.endpoint.startswith('criar_contrato') or request.endpoint.startswith('editar_contrato') or request.endpoint.startswith('visualizar_contrato') %}active{% endif %}" href="{{ url_for('listar_contratos') }}">Contratos</a>
+                        <a class="nav-link {% if request.endpoint.startswith('contrato') %}active{% endif %}" href="{{ url_for('listar_contratos') }}">
+                            <i class="fas fa-file-contract"></i> Contratos
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'listar_contratinhos' or request.endpoint.startswith('criar_contratinho') or request.endpoint.startswith('editar_contratinho') or request.endpoint.startswith('visualizar_contratinho') %}active{% endif %}" href="{{ url_for('listar_contratinhos') }}">Contratinhos</a>
+                        <a class="nav-link {% if request.endpoint.startswith('contratinho') %}active{% endif %}" href="{{ url_for('listar_contratinhos') }}">
+                            <i class="fas fa-file-invoice"></i> Contratinhos
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'listar_empenhos' or request.endpoint.startswith('criar_empenho') or request.endpoint.startswith('editar_empenho') or request.endpoint.startswith('visualizar_empenho') %}active{% endif %}" href="{{ url_for('listar_empenhos') }}">Empenhos</a>
+                        <a class="nav-link {% if request.endpoint.startswith('empenho') %}active{% endif %}" href="{{ url_for('listar_empenhos') }}">
+                            <i class="fas fa-money-check-alt"></i> Empenhos
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'listar_unidades' or request.endpoint.startswith('criar_unidade') or request.endpoint.startswith('editar_unidade') %}active{% endif %}" href="{{ url_for('listar_unidades') }}">Unidades de Saúde</a>
+                        <a class="nav-link {% if request.endpoint.startswith('unidade') %}active{% endif %}" href="{{ url_for('listar_unidades') }}">
+                           <i class="fas fa-hospital"></i> Unidades
+                        </a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle {% if request.endpoint.startswith('relatorio_') %}active{% endif %}" href="#" id="navbarDropdownRelatorios" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Relatórios
+                        <a class="nav-link dropdown-toggle {% if request.endpoint.startswith('relatorio') %}active{% endif %}" href="#" id="navbarDropdownRelatorios" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-chart-bar"></i> Relatórios
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdownRelatorios">
-                            <li><a class="dropdown-item {% if request.endpoint == 'relatorio_lista_atas_pdf' %}active{% endif %}" href="{{ url_for('relatorio_lista_atas_pdf') }}" target="_blank">Listagem de Todas as Atas (PDF)</a></li>
-                            {# Adicionar aqui outros relatórios PDF gerais, se houver #}
+                            <li><a class="dropdown-item" href="{{ url_for('relatorio_lista_atas_pdf') }}" target="_blank">Listagem de Todas as Atas (PDF)</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item {% if request.endpoint == 'relatorio_consumo_unidade' %}active{% endif %}" href="{{ url_for('relatorio_consumo_unidade') }}">Consumo por Unidade de Saúde</a></li>
-                            {# MODIFICADO: Adicionado novo link de relatório abaixo #}
-                            <li><a class="dropdown-item {% if request.endpoint == 'relatorio_consumo_item' %}active{% endif %}" href="{{ url_for('relatorio_consumo_item') }}">Consumo por Item Específico</a></li>
+                            <li><a class="dropdown-item {% if request.endpoint == 'relatorio_consumo_unidade' %}active{% endif %}" href="{{ url_for('relatorio_consumo_unidade') }}">Consumo por Unidade</a></li>
+                            <li><a class="dropdown-item {% if request.endpoint == 'relatorio_consumo_item' %}active{% endif %}" href="{{ url_for('relatorio_consumo_item') }}">Consumo por Item</a></li>
+                            <li><a class="dropdown-item {% if request.endpoint == 'relatorio_contratos_vigentes_unidade' %}active{% endif %}" href="{{ url_for('relatorio_contratos_vigentes_unidade') }}">Docs Vigentes por Unidade</a></li>
+                            <li><a class="dropdown-item {% if request.endpoint == 'relatorio_potencial_de_solicitacao' %}active{% endif %}" href="{{ url_for('relatorio_potencial_de_solicitacao') }}">Potencial de Solicitação por Unidade</a></li>
                         </ul>
                     </li>
                 </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle"></i>
+                            {{ current_user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarUserDropdown">
+                            {% if current_user.role == 'admin' %}
+                            <li><a class="dropdown-item {% if request.endpoint == 'admin_listar_usuarios' %}active{% endif %}" href="{{ url_for('admin_listar_usuarios') }}"><i class="fas fa-users-cog"></i> Gerenciar Usuários</a></li>
+                            <li><a class="dropdown-item {% if request.endpoint == 'admin_visualizar_logs' %}active{% endif %}" href="{{ url_for('admin_visualizar_logs') }}"><i class="fas fa-history"></i> Logs de Atividade</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            {% endif %}
+                            <li><a class="dropdown-item" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout (Sair)</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                {% endif %}
             </div>
         </div>
     </nav>
 
-    <div class="container mt-4">
+    <main class="container mt-5 pt-3">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
@@ -132,20 +118,20 @@
             {% endif %}
         {% endwith %}
 
-        {% block content %}
-        <h2>Página Principal</h2>
-            <p>Bem-vindo ao Sistema de Gestão de Contratos.</p>
-        {% endblock %}
-    </div>
+        {% block content %}{% endblock %}
+    </main>
 
-    <footer class="footer">
+    <footer class="footer mt-auto py-3 bg-light">
         <div class="container text-center">
-            <p>&copy; {{ ano_atual }} Secretaria de Saúde - Nova Friburgo. Projeto Piloto.</p>
+            <span class="text-muted">&copy; {{ ano_atual }} Secretaria de Saúde - Nova Friburgo. Projeto Piloto.</span>
         </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    {% block scripts %}{% endblock %}
+    
+    {% block scripts %}
+    {# --- LINHA ADICIONADA --- #}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    {% endblock %}
 </body>
 </html>

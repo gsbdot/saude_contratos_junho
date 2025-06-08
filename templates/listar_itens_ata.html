@@ -1,21 +1,21 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <h2>{{ titulo_pagina if titulo_pagina else ("Itens da Ata: " + (ata.numero_ata if ata else "Desconhecida")) }}</h2>
         {% if ata %}
         <div class="btn-group">
+            {% if current_user.role in ['admin', 'gestor'] %}
             <a href="{{ url_for('adicionar_itens_lote_ata', ata_id=ata.id) }}" class="btn btn-info">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-collection-fill" viewBox="0 0 16 16">
-                  <path d="M0 13a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 16 13V6a1.5 1.5 0 0 0-1.5-1.5h-13A1.5 1.5 0 0 0 0 6v7zM2 3a.5.5 0 0 0 .5.5h11a.5.5 0 0 0 0-1h-11A.5.5 0 0 0 2 3zm2-2a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 0-1h-7A.5.5 0 0 0 4 1z"/>
-                </svg>
-                Adicionar Itens em Lote
+                <i class="fas fa-list-ol"></i> Adicionar Itens em Lote
             </a>
             <a href="{{ url_for('criar_item_ata', ata_id=ata.id) }}" class="btn btn-success ms-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
-                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z"/>
-                </svg>
-                Adicionar Item Individual
+                <i class="fas fa-plus-circle"></i> Adicionar Item Individual
+            </a>
+            {% endif %}
+             {# --- BOTÃO ADICIONADO --- #}
+            <a href="{{ url_for('relatorio_detalhes_ata_pdf', ata_id=ata.id) }}" class="btn btn-danger ms-2" target="_blank">
+                <i class="fas fa-file-pdf"></i> Gerar PDF
             </a>
         </div>
         {% endif %}
@@ -29,15 +29,6 @@
             <strong>Assinatura:</strong> {{ ata.data_assinatura.strftime('%d/%m/%Y') if ata.data_assinatura else "-" }} | 
             <strong>Validade:</strong> {{ ata.data_validade.strftime('%d/%m/%Y') if ata.data_validade else "-" }}
         </small>
-        <div class="mt-1">
-             <a href="{{ url_for('relatorio_detalhes_ata_pdf', ata_id=ata.id) }}" class="btn btn-sm btn-outline-danger" target="_blank" title="Gerar PDF Detalhado desta Ata e Itens">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-pdf-fill" viewBox="0 0 16 16">
-                    <path d="M5.523 12.424q.21-.124.459-.238a8.008 8.008 0 0 1-.46 3.708c-.29.774-.215 1.05-.118 1.107h.118l-.118-.007a.115.115 0 0 1-.118-.117h.118l-.118.007q-.097-.057-.118-.117A7.99 7.99 0 0 1 4.75 16.55V15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H4v5.5l.007.007a.117.117 0 0 1 .118.118Zm.847-4.147c.282.52.732.826 1.229.826.414 0 .75-.175.966-.374.214-.197.322-.477.322-.816 0-.307-.11-.555-.33-.745-.22-.19-.515-.285-.884-.285-.257 0-.506.066-.74.199a.992.992 0 0 0-.499.617c-.04.165-.06.32-.06.463 0 .135.02.284.061.443ZM8.176 11q.322 1.018 1.09 1.625.77.606 1.748.606a3.336 3.336 0 0 0 1.06-.162c.318-.1.58-.25.78-.453a1.5 1.5 0 0 0 .509-.874c.032-.2.032-.4.032-.596v-蚱｡c0-.403-.047-.788-.141-1.153a2.854 2.854 0 0 0-.477-.99c-.282-.354-.64-.62-1.072-.798a3.264 3.264 0 0 0-1.446-.277c-.617 0-1.14.211-1.56.634-.422.422-.645.98-.645 1.677 0 .245.026.48.078.703a1.73 1.73 0 0 0 .251.623Z"/>
-                    <path d="M4.603 14.087a.81.81 0 0 1-.438-.42c-.195-.388-.13-.776.08-1.102.198-.307.526-.568.897-.787a7.68 7.68 0 0 1 1.482-.645 8.07 8.07 0 0 0 1.06-.088.996.996 0 0 1 .157.002.99.99 0 0 1 .143.028 1 1 0 0 1 .219.077.853.853 0 0 1 .109.068.993.993 0 0 1 .122.098 1.078 1.078 0 0 1 .097.118c.024.034.048.072.072.113.022.04.042.082.058.126.018.047.03.096.038.146a.606.606 0 0 1 0 .065.408.408 0 0 1-.004.039.431.431 0 0 1-.007.032l-.008.02a.88.88 0 0 1-.017.029l-.005.008-.003.003a1.012 1.012 0 0 1-.022.022.994.994 0 0 1-.022.02c-.024.017-.05.03-.078.04-.027.012-.057.02-.087.024a1.04 1.04 0 0 1-.09.016.99.99 0 0 1-.097.006c-.049 0-.099-.003-.148-.01a7.712 7.712 0 0 1-1.282-.156 7.74 7.74 0 0 1-1.07-.375 8.001 8.001 0 0 1-.88-.527.843.843 0 0 1-.212-.213.817.817 0 0 1-.15-.252.847.847 0 0 1-.06-.269.852.852 0 0 1-.014-.283.82.82 0 0 1 .002-.18.804.804 0 0 1 .014-.163c.01-.043.026-.083.046-.12.02-.038.043-.074.07-.108.026-.034.057-.065.09-.094a1 1 0 0 1 .118-.096.976.976 0 0 1 .117-.077ZM8.5 7H5.5V4H8v3q0 .42-.15.735A1.13 1.13 0 0 0 8.5 7Z"/>
-                    <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2ZM9.5 3A1.5 1.5 0 0 0 8 4.5V5h4V3h-2.5Z"/>
-                </svg> PDF
-            </a>
-        </div>
     </div>
     {% endif %}
 
@@ -52,40 +43,34 @@
                         <th class="text-end">Qtd. Reg.</th>
                         <th class="text-end">Saldo Disp.</th>
                         <th class="text-end">Vlr. Unit.</th>
-                        <th>Lote</th>
-                        {# COLUNAS REMOVIDAS ABAIXO #}
-                        {# <th>Garantia Fim</th> #}
-                        {# <th class="text-center">Calib.?</th> #}
-                        {# <th>Últ. Calib.</th> #}
-                        {# <th>Próx. Calib.</th> #}
-                        {# <th class="text-center">Reutil.?</th> #}
-                        <th style="width: 10%; text-align: center;">Ações</th>
+                        <th style="width: 20%; text-align: center;">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for item in itens_da_ata %}
-                    <tr class="{{ 'table-danger' if item.saldo_disponivel is not none and item.saldo_disponivel <= 0 else ('table-warning' if item.quantidade_registrada > 0 and item.saldo_disponivel is not none and (item.saldo_disponivel / item.quantidade_registrada) <= config.PERCENTUAL_SALDO_BAIXO else '') }}">
+                    <tr class="{{ 'table-danger' if item.saldo_disponivel is not none and item.saldo_disponivel <= 0 else ('table-warning' if item.quantidade_registrada > 0 and item.saldo_disponivel is not none and (item.saldo_disponivel / item.quantidade_registrada) * 100 <= config.PERCENTUAL_SALDO_BAIXO else '') }}">
                         <td>{{ item.descricao_item|truncate(40,True) }}</td>
                         <td>{{ tipo_item_display_map.get(item.tipo_item, item.tipo_item) }}</td>
                         <td>{{ item.unidade_medida if item.unidade_medida else '-' }}</td>
                         <td class="text-end">{{ item.quantidade_registrada | format_quantity }}</td>
                         <td class="text-end fw-bold">{{ item.saldo_disponivel | format_quantity }}</td>
                         <td class="text-end">{{ item.valor_unitario_registrado | br_currency }}</td>
-                        <td>{{ item.lote if item.lote else '-' }}</td>
-                        {# DADOS DAS COLUNAS REMOVIDAS ABAIXO #}
-                        {# <td>{{ item.data_garantia_fim.strftime('%d/%m/%Y') if item.data_garantia_fim else '-' }}</td> #}
-                        {# <td class="text-center">{{ 'Sim' if item.requer_calibracao else 'Não' }}</td> #}
-                        {# <td>{{ item.ultima_calibracao.strftime('%d/%m/%Y') if item.ultima_calibracao else '-' }}</td> #}
-                        {# <td>{{ item.proxima_calibracao.strftime('%d/%m/%Y') if item.proxima_calibracao else '-' }}</td> #}
-                        {# <td class="text-center">{{ 'Sim' if item.reutilizavel else 'Não' }}</td> #}
                         <td class="text-center table-actions">
+                             <a href="{{ url_for('visualizar_cotas_item', item_id=item.id) }}" class="btn btn-outline-success btn-sm" title="Visualizar Cotas">
+                                <i class="fas fa-chart-pie"></i>
+                            </a>
+                            {% if current_user.role in ['admin', 'gestor'] %}
+                            <a href="{{ url_for('gerenciar_cotas_item', item_id=item.id) }}" class="btn btn-outline-secondary btn-sm" title="Gerenciar Cotas por Unidade">
+                                <i class="fas fa-tasks"></i>
+                            </a>
                             <a href="{{ url_for('editar_item_ata', ata_id=item.ata_id, item_id=item.id) }}" class="btn btn-outline-primary btn-sm" title="Editar Item">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16"><path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/><path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/></svg>
+                                <i class="fas fa-pencil-alt"></i>
                             </a>
                             <a href="{{ url_for('excluir_item_ata', ata_id=item.ata_id, item_id=item.id) }}" class="btn btn-outline-danger btn-sm" title="Excluir Item"
                                onclick="return confirm('Tem certeza que deseja excluir este item da ata?');">
-                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16"><path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.024l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm3 0l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm3 .534l-.5 8.5a.5.5 0 1 0 .998.057l.5-8.5a.5.5 0 1 0-.998-.057Z"/></svg>
+                               <i class="fas fa-trash-alt"></i>
                             </a>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}

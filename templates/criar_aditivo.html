@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>{{ titulo_pagina if titulo_pagina else "Adicionar Termo Aditivo" }}</h2>
+    <h4 class="text-muted">Para o Contrato: {{ contrato.numero_contrato }}</h4>
+    <hr class="my-4">
+
+    <form method="POST" action="" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                {{ form.numero_aditivo.label(class="form-label") }}
+                {{ form.numero_aditivo(class="form-control" + (" is-invalid" if form.numero_aditivo.errors else "")) }}
+                {% if form.numero_aditivo.errors %}<div class="invalid-feedback d-block">{% for error in form.numero_aditivo.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+            </div>
+            <div class="col-md-6 mb-3">
+                {{ form.data_assinatura.label(class="form-label") }}
+                {{ form.data_assinatura(class="form-control" + (" is-invalid" if form.data_assinatura.errors else "")) }}
+                {% if form.data_assinatura.errors %}<div class="invalid-feedback d-block">{% for error in form.data_assinatura.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+            </div>
+        </div>
+
+        <div class="mb-3">
+            {{ form.objeto.label(class="form-label") }}
+            {{ form.objeto(class="form-control" + (" is-invalid" if form.objeto.errors else ""), rows="3") }}
+            {% if form.objeto.errors %}<div class="invalid-feedback d-block">{% for error in form.objeto.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+        </div>
+        
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                {{ form.valor_acrescimo.label(class="form-label") }}
+                {{ form.valor_acrescimo(class="form-control" + (" is-invalid" if form.valor_acrescimo.errors else ""), placeholder="-500,00 ou 1000,00") }}
+                 <small class="form-text text-muted">{{ form.valor_acrescimo.description }}</small>
+                {% if form.valor_acrescimo.errors %}<div class="invalid-feedback d-block">{% for error in form.valor_acrescimo.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+            </div>
+            <div class="col-md-4 mb-3">
+                {{ form.prazo_adicional_dias.label(class="form-label") }}
+                {{ form.prazo_adicional_dias(class="form-control" + (" is-invalid" if form.prazo_adicional_dias.errors else ""), placeholder="Ex: 30") }}
+                <small class="form-text text-muted">{{ form.prazo_adicional_dias.description }}</small>
+                {% if form.prazo_adicional_dias.errors %}<div class="invalid-feedback d-block">{% for error in form.prazo_adicional_dias.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+            </div>
+            <div class="col-md-4 mb-3">
+                {{ form.nova_data_fim_vigencia.label(class="form-label") }}
+                {{ form.nova_data_fim_vigencia(class="form-control" + (" is-invalid" if form.nova_data_fim_vigencia.errors else "")) }}
+                 <small class="form-text text-muted">{{ form.nova_data_fim_vigencia.description }}</small>
+                {% if form.nova_data_fim_vigencia.errors %}<div class="invalid-feedback d-block">{% for error in form.nova_data_fim_vigencia.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            {{ form.submit(class="btn btn-primary") }}
+            <a href="{{ url_for('visualizar_contrato', contrato_id=contrato.id) }}" class="btn btn-secondary ms-2">Cancelar</a>
+        </div>
+    </form>
+{% endblock %}

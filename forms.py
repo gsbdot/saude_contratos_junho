@@ -1,19 +1,19 @@
+# Início do arquivo completo: forms.py
+
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, IntegerField, DateField, SubmitField, FloatField as WTFormsFloatField, SelectField, BooleanField
-from wtforms.fields import FieldList, FormField
-from wtforms.validators import DataRequired, Length, Optional, NumberRange, ValidationError, Email
-from models import Ata, ItemAta, UnidadeSaude, ItemContrato
+from wtforms import StringField, TextAreaField, IntegerField, DateField, SubmitField, FloatField as WTFormsFloatField, SelectField, BooleanField, HiddenField, PasswordField
+from wtforms.fields import FieldList, FormField, FileField
+from wtforms.validators import DataRequired, Length, Optional, NumberRange, ValidationError, Email, EqualTo
+from models import Ata, ItemAta, UnidadeSaude, ItemContrato, User
 from wtforms import Form as WTForm_Form 
 from datetime import date
-import math # Para math.isclose
+import math
 
-# CLASSE PARA LIDAR COM INPUT DE MOEDA/FLOAT BRASILEIRO
 class BrazilianFloatField(WTFormsFloatField):
     def process_formdata(self, valuelist):
         if valuelist:
             raw_value = str(valuelist[0]) 
-            if raw_value and raw_value.strip(): # Verifica se não é string vazia ou só espaços
-                # Remove pontos (separadores de milhar) e substitui vírgula decimal por ponto
+            if raw_value and raw_value.strip():
                 cleaned_value = raw_value.replace('.', '').replace(',', '.')
                 try:
                     self.data = float(cleaned_value)
@@ -21,7 +21,7 @@ class BrazilianFloatField(WTFormsFloatField):
                     self.data = None 
                     raise ValueError(self.gettext('Não é um valor decimal válido.')) 
             else: 
-                self.data = None # Se o campo for opcional e enviado vazio
+                self.data = None
         else: 
             self.data = None
 
@@ -31,6 +31,11 @@ def coerce_int_or_none(x):
     except ValueError: raise ValidationError('Valor inválido para seleção.')
 
 DATE_FORMATS = ['%Y-%m-%d', '%d/%m/%Y']
+
+class LoginForm(FlaskForm):
+    username = StringField('Usuário', validators=[DataRequired()])
+    password = PasswordField('Senha', validators=[DataRequired()])
+    submit = SubmitField('Entrar')
 
 class AtaForm(FlaskForm):
     numero_ata = StringField('Número da Ata', validators=[DataRequired(), Length(min=1, max=100)])
@@ -53,7 +58,7 @@ class ItemAtaLoteSubForm(WTForm_Form):
     descricao_item = StringField('Descrição do Item', validators=[DataRequired(), Length(max=255)])
     tipo_item = SelectField('Tipo do Item', choices=ItemAta.TIPO_ITEM_CHOICES, validators=[DataRequired()])
     unidade_medida = StringField('Unidade de Medida', validators=[Optional(), Length(max=50)])
-    quantidade_registrada = BrazilianFloatField('Qtd. Registrada', validators=[DataRequired(), NumberRange(min=0.000001, message="Qtd. deve ser positiva.")]) # MODIFICADO
+    quantidade_registrada = BrazilianFloatField('Qtd. Registrada', validators=[DataRequired(), NumberRange(min=0.000001, message="Qtd. deve ser positiva.")])
     valor_unitario_registrado = BrazilianFloatField('Valor Unitário (R$)', validators=[Optional(), NumberRange(min=0)])
     lote = StringField('Lote', validators=[Optional(), Length(max=100)])
 
@@ -65,7 +70,7 @@ class ItemAtaForm(FlaskForm):
     descricao_item = StringField('Descrição do Item', validators=[DataRequired(), Length(max=255)])
     tipo_item = SelectField('Tipo do Item', choices=ItemAta.TIPO_ITEM_CHOICES, validators=[DataRequired()])
     unidade_medida = StringField('Unidade de Medida', validators=[Optional(), Length(max=50)])
-    quantidade_registrada = BrazilianFloatField('Qtd. Registrada na Ata', validators=[DataRequired(), NumberRange(min=0)]) # MODIFICADO
+    quantidade_registrada = BrazilianFloatField('Qtd. Registrada na Ata', validators=[DataRequired(), NumberRange(min=0)])
     valor_unitario_registrado = BrazilianFloatField('Valor Unitário (R$)', validators=[Optional(), NumberRange(min=0)])
     lote = StringField('Lote', validators=[Optional(), Length(max=100)])
     submit = SubmitField('Salvar Item da Ata')
@@ -83,19 +88,24 @@ class UnidadeSaudeForm(FlaskForm):
 class ItemLivreContratoSubForm(WTForm_Form):
     descricao = StringField('Descrição do Item', validators=[DataRequired(message="Descrição do item é obrigatória."), Length(max=500)])
     unidade_medida = StringField('Unidade', validators=[Optional(), Length(max=50)])
-    quantidade = BrazilianFloatField('Quantidade', validators=[DataRequired(message="Quantidade é obrigatória."), NumberRange(min=0.000001, message="Quantidade deve ser positiva.")]) # MODIFICADO
+    quantidade = BrazilianFloatField('Quantidade', validators=[DataRequired(message="Quantidade é obrigatória."), NumberRange(min=0.000001, message="Quantidade deve ser positiva.")])
     valor_unitario = BrazilianFloatField('Valor Unitário (R$)', validators=[DataRequired(message="Valor unitário é obrigatório."), NumberRange(min=0)]) 
 
 class ContratoForm(FlaskForm): 
     numero_contrato = StringField('Número do Contrato', validators=[DataRequired(), Length(min=1, max=100)])
     objeto = TextAreaField('Objeto do Contrato', validators=[DataRequired(), Length(max=1000)])
-    valor_global_contrato = BrazilianFloatField('Valor Global do Contrato (R$)', validators=[DataRequired(message="Valor global é obrigatório."), NumberRange(min=0.0)]) 
+    unidade_saude_id = SelectField('Unidade de Saúde Responsável (Opcional)', coerce=coerce_int_or_none, validators=[Optional()])
     fornecedor = StringField('Fornecedor', validators=[Optional(), Length(max=200)])
     data_assinatura_contrato = DateField('Data de Assinatura', format=DATE_FORMATS, validators=[Optional()])
     data_inicio_vigencia = DateField('Início da Vigência', format=DATE_FORMATS, validators=[Optional()])
     data_fim_vigencia = DateField('Fim da Vigência', format=DATE_FORMATS, validators=[Optional()])
-    itens_contratados = FieldList(FormField(ItemLivreContratoSubForm), min_entries=0, max_entries=50)
+    itens_contratados = FieldList(FormField(ItemLivreContratoSubForm), min_entries=1, max_entries=50)
     submit = SubmitField('Salvar Contrato')
+
+    def __init__(self, *args, **kwargs):
+        super(ContratoForm, self).__init__(*args, **kwargs)
+        self.unidade_saude_id.choices = [('', '--- Nenhuma (Geral da Secretaria) ---')] + \
+                                        [(u.id, u.nome_unidade) for u in UnidadeSaude.query.order_by(UnidadeSaude.nome_unidade).all()]
 
     def validate_data_assinatura_contrato(self, field):
         if field.data and field.data > date.today():
@@ -114,47 +124,21 @@ class ContratoForm(FlaskForm):
             if field.data < self.data_assinatura_contrato.data:
                 raise ValidationError('O Fim da Vigência não pode ser anterior à Data de Assinatura.')
 
-    def validate(self, extra_validators=None):
-        initial_validation = super(ContratoForm, self).validate(extra_validators)
-        if not initial_validation:
-            return False
-
-        is_valid = True
-        soma_valor_itens = 0.0
-        has_actual_items = False
-
-        if self.itens_contratados.data:
-            for item_data in self.itens_contratados.data:
-                descricao = item_data.get('descricao', '').strip()
-                quantidade_val = item_data.get('quantidade') 
-                valor_unitario_val = item_data.get('valor_unitario')
-
-                if descricao and quantidade_val is not None and valor_unitario_val is not None:
-                    has_actual_items = True # Marcamos que há um item a ser considerado
-                    try:
-                        # Os valores já devem ser float aqui devido ao BrazilianFloatField
-                        soma_valor_itens += float(quantidade_val) * float(valor_unitario_val)
-                    except (TypeError, ValueError):
-                        # Este item é inválido para a soma, mas o erro de campo deve ser mostrado pela validação do subform
-                        pass
-        
-        valor_global = self.valor_global_contrato.data if self.valor_global_contrato.data is not None else 0.0
-        
-        if has_actual_items: # Só valida a soma se itens foram efetivamente adicionados e processados
-            if not math.isclose(valor_global, soma_valor_itens, abs_tol=0.001): # Tolerância de 0.1 centavo
-                msg_valor_global = f"R$ {valor_global:.2f}".replace('.', ',')
-                msg_soma_itens = f"R$ {soma_valor_itens:.2f}".replace('.', ',')
-                
-                error_msg = (f"O Valor Global do Contrato ({msg_valor_global}) "
-                             f"deve ser igual à soma dos valores dos itens ({msg_soma_itens}).")
-                self.valor_global_contrato.errors.append(error_msg)
-                is_valid = False
-        
-        return is_valid
+class AditivoForm(FlaskForm):
+    numero_aditivo = StringField('Número do Termo Aditivo', validators=[DataRequired(), Length(max=100)])
+    data_assinatura = DateField('Data de Assinatura', format=DATE_FORMATS, validators=[DataRequired()])
+    objeto = TextAreaField('Objeto do Aditivo', validators=[Optional(), Length(max=1000)])
+    valor_acrescimo = BrazilianFloatField('Acréscimo de Valor (R$)', validators=[Optional()], 
+                                          description="Use valor negativo para decréscimo. Ex: -500,00")
+    prazo_adicional_dias = IntegerField('Prazo Adicional (dias)', validators=[Optional()],
+                                        description="Use valor negativo para redução de prazo.")
+    nova_data_fim_vigencia = DateField('Ou Nova Data Final de Vigência', format=DATE_FORMATS, validators=[Optional()],
+                                       description="Preencha para definir uma data final exata, ignorando o prazo em dias.")
+    submit = SubmitField('Salvar Termo Aditivo')
 
 class ConsumoItemSubFormulario(WTForm_Form): 
     item_ata_id = SelectField('Item da Ata', coerce=coerce_int_or_none, validators=[DataRequired(message="Item é obrigatório.")])
-    quantidade_consumida = BrazilianFloatField('Quantidade Consumida', validators=[DataRequired(message="Qtd. é obrigatória."), NumberRange(min=0.000001, message="Qtd. deve ser positiva.")]) # MODIFICADO
+    quantidade_consumida = BrazilianFloatField('Quantidade Consumida', validators=[DataRequired(message="Qtd. é obrigatória."), NumberRange(min=0.000001, message="Qtd. deve ser positiva.")])
 
 class ContratinhoForm(FlaskForm):
     numero_contratinho = StringField('Número do Contratinho/Doc.', validators=[DataRequired(), Length(max=100)])
@@ -183,14 +167,12 @@ class ContratinhoForm(FlaskForm):
                               [(ata.id, f"{ata.numero_ata}/{ata.ano}") for ata in Ata.query.order_by(Ata.ano.desc(), Ata.numero_ata.desc()).all()]
         self.unidade_saude_id.choices = [('', '--- Nenhuma Unidade ---')] + \
                                         [(u.id, u.nome_unidade) for u in UnidadeSaude.query.order_by(UnidadeSaude.nome_unidade).all()]
-        
         ata_selecionada_id = None
         if self.ata_id.data is not None: 
             try: ata_selecionada_id = int(self.ata_id.data)
             except ValueError: pass
         elif kwargs.get('obj') and hasattr(kwargs['obj'], 'ata_id') and kwargs['obj'].ata_id is not None:
             ata_selecionada_id = kwargs['obj'].ata_id
-        
         item_choices_options = [('', '--- Selecione uma Ata Principal Primeiro ---')]
         if ata_selecionada_id is not None:
             itens_da_ata_selecionada = ItemAta.query.filter_by(ata_id=ata_selecionada_id).filter(ItemAta.saldo_disponivel > 0).order_by(ItemAta.descricao_item).all()
@@ -203,7 +185,6 @@ class ContratinhoForm(FlaskForm):
                     item_choices_options = [('', 'Todos os itens desta Ata estão com saldo zero')]
                 else:
                     item_choices_options = [('', 'Nenhum item cadastrado para esta Ata')]
-        
         for item_form_field_entry in self.itens_consumidos:
             if hasattr(item_form_field_entry, 'form') and hasattr(item_form_field_entry.form, 'item_ata_id'):
                 item_form_field_entry.form.item_ata_id.choices = item_choices_options
@@ -229,14 +210,12 @@ class EmpenhoForm(FlaskForm):
                               [(ata.id, f"{ata.numero_ata}/{ata.ano}") for ata in Ata.query.order_by(Ata.ano.desc(), Ata.numero_ata.desc()).all()]
         self.unidade_saude_id.choices = [('', '--- Nenhuma Unidade ---')] + \
                                         [(u.id, u.nome_unidade) for u in UnidadeSaude.query.order_by(UnidadeSaude.nome_unidade).all()]
-
         ata_selecionada_id = None
         if self.ata_id.data is not None:
             try: ata_selecionada_id = int(self.ata_id.data)
             except ValueError: pass
         elif kwargs.get('obj') and hasattr(kwargs['obj'], 'ata_id') and kwargs['obj'].ata_id is not None:
             ata_selecionada_id = kwargs['obj'].ata_id
-
         item_choices_options = [('', '--- Selecione uma Ata Principal Primeiro ---')]
         if ata_selecionada_id is not None:
             itens_da_ata_selecionada = ItemAta.query.filter_by(ata_id=ata_selecionada_id).filter(ItemAta.saldo_disponivel > 0).order_by(ItemAta.descricao_item).all()
@@ -249,10 +228,18 @@ class EmpenhoForm(FlaskForm):
                     item_choices_options = [('', 'Todos os itens desta Ata estão com saldo zero')]
                 else:
                     item_choices_options = [('', 'Nenhum item cadastrado para esta Ata')]
-        
         for item_form_field_entry in self.itens_consumidos:
             if hasattr(item_form_field_entry, 'form') and hasattr(item_form_field_entry.form, 'item_ata_id'):
                 item_form_field_entry.form.item_ata_id.choices = item_choices_options
+
+class RelatorioContratosVigentesUnidadeForm(FlaskForm):
+    unidade_saude_id = SelectField('Unidade de Saúde', coerce=coerce_int_or_none, validators=[DataRequired(message="Selecione uma Unidade de Saúde.")])
+    submit = SubmitField('Gerar Relatório')
+
+    def __init__(self, *args, **kwargs):
+        super(RelatorioContratosVigentesUnidadeForm, self).__init__(*args, **kwargs)
+        self.unidade_saude_id.choices = [('', '--- Selecione uma Unidade ---')] + \
+                                        [(u.id, u.nome_unidade) for u in UnidadeSaude.query.order_by(UnidadeSaude.nome_unidade).all()]
 
 class RelatorioConsumoUnidadeForm(FlaskForm):
     unidade_saude_id = SelectField('Unidade de Saúde', coerce=coerce_int_or_none, validators=[DataRequired(message="Selecione uma Unidade de Saúde.")])
@@ -300,3 +287,68 @@ class RelatorioConsumoPorItemForm(FlaskForm):
         if field.data and self.data_inicio.data:
             if field.data < self.data_inicio.data:
                 raise ValidationError('A Data de Fim não pode ser anterior à Data de Início.')
+
+class ImportCSVForm(FlaskForm):
+    csv_file = FileField('Arquivo CSV', validators=[DataRequired(message="Por favor, selecione um arquivo.")])
+    submit = SubmitField('Importar')
+
+class CotaUnidadeSubForm(WTForm_Form):
+    unidade_saude_id = HiddenField()
+    quantidade_prevista = BrazilianFloatField('Cota', validators=[Optional(), NumberRange(min=0)])
+
+class GerenciarCotasForm(FlaskForm):
+    cotas = FieldList(FormField(CotaUnidadeSubForm))
+    submit = SubmitField('Salvar Cotas')
+
+class RelatorioPotencialDeSolicitacaoForm(FlaskForm):
+    unidade_saude_id = SelectField('Unidade de Saúde', coerce=coerce_int_or_none, validators=[DataRequired(message="Selecione uma Unidade de Saúde.")])
+    submit = SubmitField('Gerar Relatório')
+
+    def __init__(self, *args, **kwargs):
+        super(RelatorioPotencialDeSolicitacaoForm, self).__init__(*args, **kwargs)
+        self.unidade_saude_id.choices = [('', '--- Selecione uma Unidade ---')] + \
+                                        [(u.id, u.nome_unidade) for u in UnidadeSaude.query.order_by(UnidadeSaude.nome_unidade).all()]
+
+class UserCreationForm(FlaskForm):
+    username = StringField('Nome de Usuário', validators=[DataRequired(), Length(min=3, max=64)])
+    password = PasswordField('Senha', validators=[DataRequired(), Length(min=6)])
+    password2 = PasswordField('Confirmar Senha', validators=[DataRequired(), EqualTo('password', message='As senhas devem ser iguais.')])
+    role = SelectField('Nível de Acesso (Role)', choices=[('admin', 'Administrador'), ('gestor', 'Gestor de Unidade'), ('leitura', 'Apenas Leitura')], validators=[DataRequired()])
+    unidade_saude_id = SelectField('Vincular à Unidade de Saúde (Opcional)', coerce=coerce_int_or_none, validators=[Optional()])
+    submit = SubmitField('Criar Usuário')
+
+    def __init__(self, *args, **kwargs):
+        super(UserCreationForm, self).__init__(*args, **kwargs)
+        self.unidade_saude_id.choices = [('', '--- Nenhuma ---')] + \
+                                        [(u.id, u.nome_unidade) for u in UnidadeSaude.query.order_by(UnidadeSaude.nome_unidade).all()]
+
+    def validate_username(self, username):
+        user = User.query.filter_by(username=username.data).first()
+        if user is not None:
+            raise ValidationError('Este nome de usuário já está em uso. Por favor, escolha outro.')
+
+class UserEditForm(FlaskForm):
+    username = StringField('Nome de Usuário', validators=[DataRequired(), Length(min=3, max=64)])
+    password = PasswordField('Nova Senha (Opcional)', validators=[Optional(), Length(min=6, message='A senha deve ter no mínimo 6 caracteres.')])
+    password2 = PasswordField('Confirmar Nova Senha', validators=[EqualTo('password', message='As senhas devem ser iguais.')])
+    role = SelectField('Nível de Acesso (Role)', choices=[('admin', 'Administrador'), ('gestor', 'Gestor de Unidade'), ('leitura', 'Apenas Leitura')], validators=[DataRequired()])
+    unidade_saude_id = SelectField('Vincular à Unidade de Saúde (Opcional)', coerce=coerce_int_or_none, validators=[Optional()])
+    submit = SubmitField('Salvar Alterações')
+
+    def __init__(self, original_username, *args, **kwargs):
+        super(UserEditForm, self).__init__(*args, **kwargs)
+        self.original_username = original_username
+        self.unidade_saude_id.choices = [('', '--- Nenhuma ---')] + \
+                                        [(u.id, u.nome_unidade) for u in UnidadeSaude.query.order_by(UnidadeSaude.nome_unidade).all()]
+
+    def validate_username(self, username):
+        if username.data != self.original_username:
+            user = User.query.filter_by(username=self.username.data).first()
+            if user is not None:
+                raise ValidationError('Este nome de usuário já está em uso. Por favor, escolha outro.')
+
+class CommentForm(FlaskForm):
+    content = TextAreaField('Comentário', validators=[DataRequired(), Length(min=1, max=1000)])
+    submit = SubmitField('Enviar Comentário')
+
+# Fim do arquivo: forms.py

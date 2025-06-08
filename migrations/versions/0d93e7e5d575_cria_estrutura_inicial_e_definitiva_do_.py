@@ -1,8 +1,8 @@
-"""Criacao inicial de todas as tabelas com estrutura completa
+"""Cria estrutura inicial e definitiva do banco
 
-Revision ID: 6df067cc0e14
+Revision ID: 0d93e7e5d575
 Revises: 
-Create Date: 2025-05-30 12:13:52.393322
+Create Date: 2025-06-07 12:57:06.286536
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '6df067cc0e14'
+revision = '0d93e7e5d575'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -64,11 +64,11 @@ def upgrade():
     sa.Column('fornecedor', sa.String(length=200), nullable=True),
     sa.Column('data_assinatura_contrato', sa.DateTime(), nullable=True),
     sa.Column('data_inicio_vigencia', sa.DateTime(), nullable=True),
+    sa.Column('data_fim_vigencia_original', sa.DateTime(), nullable=True),
     sa.Column('data_fim_vigencia', sa.DateTime(), nullable=True),
     sa.Column('criado_em', sa.DateTime(), nullable=True),
-    sa.Column('ata_id', sa.Integer(), nullable=True),
-    sa.Column('valor_total_itens', sa.Float(), nullable=True),
-    sa.ForeignKeyConstraint(['ata_id'], ['ata.id'], name='fk_contrato_ata_id'),
+    sa.Column('unidade_saude_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['unidade_saude_id'], ['unidade_saude.id'], name='fk_contrato_unidade_saude_id'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('numero_contrato')
     )
@@ -96,14 +96,34 @@ def upgrade():
     sa.Column('valor_unitario_registrado', sa.Float(), nullable=True),
     sa.Column('lote', sa.String(length=100), nullable=True),
     sa.Column('tipo_item', sa.String(length=50), nullable=False),
-    sa.Column('data_garantia_fim', sa.DateTime(), nullable=True),
-    sa.Column('requer_calibracao', sa.Boolean(), nullable=True),
-    sa.Column('ultima_calibracao', sa.DateTime(), nullable=True),
-    sa.Column('proxima_calibracao', sa.DateTime(), nullable=True),
-    sa.Column('reutilizavel', sa.Boolean(), nullable=True),
     sa.Column('ata_id', sa.Integer(), nullable=False),
     sa.Column('criado_em', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['ata_id'], ['ata.id'], name='fk_itemata_ata_id'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('user',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('username', sa.String(length=64), nullable=False),
+    sa.Column('password_hash', sa.String(length=256), nullable=False),
+    sa.Column('role', sa.String(length=20), nullable=False),
+    sa.Column('unidade_saude_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['unidade_saude_id'], ['unidade_saude.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    with op.batch_alter_table('user', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_user_username'), ['username'], unique=True)
+
+    op.create_table('aditivo',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('contrato_id', sa.Integer(), nullable=False),
+    sa.Column('numero_aditivo', sa.String(length=100), nullable=False),
+    sa.Column('data_assinatura', sa.DateTime(), nullable=False),
+    sa.Column('objeto', sa.Text(), nullable=True),
+    sa.Column('valor_acrescimo', sa.Float(), nullable=True),
+    sa.Column('prazo_adicional_dias', sa.Integer(), nullable=True),
+    sa.Column('nova_data_fim_vigencia', sa.DateTime(), nullable=True),
+    sa.Column('criado_em', sa.DateTime(), nullable=True),
+    sa.ForeignKeyConstraint(['contrato_id'], ['contrato.id'], name='fk_aditivo_contrato_id', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('consumo_item_contratinho',
@@ -117,17 +137,6 @@ def upgrade():
     sa.ForeignKeyConstraint(['item_ata_id'], ['item_ata.id'], name='fk_consumoitemcontratinho_item_ata_id', ondelete='RESTRICT'),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('consumo_item_contrato',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('contrato_id', sa.Integer(), nullable=False),
-    sa.Column('item_ata_id', sa.Integer(), nullable=False),
-    sa.Column('quantidade_contratada', sa.Float(), nullable=False),
-    sa.Column('valor_unitario_contratado', sa.Float(), nullable=True),
-    sa.Column('valor_total_item_contratado', sa.Float(), nullable=True),
-    sa.ForeignKeyConstraint(['contrato_id'], ['contrato.id'], name='fk_consumoitemcontrato_contrato_id', ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['item_ata_id'], ['item_ata.id'], name='fk_consumoitemcontrato_item_ata_id', ondelete='RESTRICT'),
-    sa.PrimaryKeyConstraint('id')
-    )
     op.create_table('consumo_item_empenho',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('empenho_id', sa.Integer(), nullable=False),
@@ -139,14 +148,42 @@ def upgrade():
     sa.ForeignKeyConstraint(['item_ata_id'], ['item_ata.id'], name='fk_consumoitemempenho_item_ata_id', ondelete='RESTRICT'),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('cota_unidade_item',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('item_ata_id', sa.Integer(), nullable=False),
+    sa.Column('unidade_saude_id', sa.Integer(), nullable=False),
+    sa.Column('quantidade_prevista', sa.Float(), nullable=False),
+    sa.Column('quantidade_consumida', sa.Float(), nullable=False),
+    sa.ForeignKeyConstraint(['item_ata_id'], ['item_ata.id'], name='fk_cota_item_ata_id', ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['unidade_saude_id'], ['unidade_saude.id'], name='fk_cota_unidade_saude_id', ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('item_ata_id', 'unidade_saude_id', name='_item_unidade_uc')
+    )
+    op.create_table('item_contrato',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('contrato_id', sa.Integer(), nullable=False),
+    sa.Column('descricao', sa.String(length=500), nullable=False),
+    sa.Column('unidade_medida', sa.String(length=50), nullable=True),
+    sa.Column('quantidade', sa.Float(), nullable=False),
+    sa.Column('valor_unitario', sa.Float(), nullable=True),
+    sa.Column('valor_total_item', sa.Float(), nullable=True),
+    sa.ForeignKeyConstraint(['contrato_id'], ['contrato.id'], name='fk_itemcontrato_contrato_id', ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
     # ### end Alembic commands ###
 
 
 def downgrade():
     # ### commands auto generated by Alembic - please adjust! ###
+    op.drop_table('item_contrato')
+    op.drop_table('cota_unidade_item')
     op.drop_table('consumo_item_empenho')
-    op.drop_table('consumo_item_contrato')
     op.drop_table('consumo_item_contratinho')
+    op.drop_table('aditivo')
+    with op.batch_alter_table('user', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_user_username'))
+
+    op.drop_table('user')
     op.drop_table('item_ata')
     op.drop_table('empenho')
     op.drop_table('contrato')
