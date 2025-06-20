@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>{{ titulo_pagina if titulo_pagina else "Editar Ata" }}: {{ form.numero_ata.data if form.numero_ata.data else ata_id }}</h2>
+    <hr class="my-4">
+    <form method="POST" action="" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                {{ form.numero_ata.label(class="form-label") }}
+                {{ form.numero_ata(class="form-control" + (" is-invalid" if form.numero_ata.errors else "")) }}
+                {% if form.numero_ata.errors %}<div class="invalid-feedback d-block">{% for error in form.numero_ata.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+            </div>
+            <div class="col-md-6 mb-3">
+                {{ form.ano.label(class="form-label") }}
+                {{ form.ano(class="form-control" + (" is-invalid" if form.ano.errors else "")) }}
+                {% if form.ano.errors %}<div class="invalid-feedback d-block">{% for error in form.ano.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+            </div>
+        </div>
+
+        <div class="mb-3">
+            {{ form.processo_id.label(class="form-label") }}
+            {{ form.processo_id(class="form-select" + (" is-invalid" if form.processo_id.errors else "")) }}
+            {% if form.processo_id.errors %}<div class="invalid-feedback d-block">{% for error in form.processo_id.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.descricao.label(class="form-label") }}
+            {{ form.descricao(class="form-control" + (" is-invalid" if form.descricao.errors else ""), rows="3") }}
+            {% if form.descricao.errors %}<div class="invalid-feedback d-block">{% for error in form.descricao.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                {{ form.data_assinatura.label(class="form-label") }}
+                {{ form.data_assinatura(class="form-control" + (" is-invalid" if form.data_assinatura.errors else "")) }}
+                {% if form.data_assinatura.errors %}<div class="invalid-feedback d-block">{% for error in form.data_assinatura.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+            </div>
+            <div class="col-md-6 mb-3">
+                {{ form.data_validade.label(class="form-label") }}
+                {{ form.data_validade(class="form-control" + (" is-invalid" if form.data_validade.errors else "")) }}
+                {% if form.data_validade.errors %}<div class="invalid-feedback d-block">{% for error in form.data_validade.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            {{ form.submit(value="Salvar Alterações", class="btn btn-primary") }}
+            <a href="{{ url_for('index') }}" class="btn btn-secondary ms-2">Cancelar</a>
+        </div>
+    </form>
+{% endblock %}

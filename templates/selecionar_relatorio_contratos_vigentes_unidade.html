@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>{{ titulo_pagina if titulo_pagina else "Relatório de Documentos Vigentes por Unidade" }}</h2>
+    <p class="text-muted">Selecione uma Unidade de Saúde para gerar um relatório em PDF com todos os Contratos, Contratinhos e Empenhos vinculados e vigentes.</p>
+    <hr class="my-4">
+
+    <form method="POST" action="" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="row">
+            <div class="col-md-8 mb-3">
+                {{ form.unidade_saude_id.label(class="form-label") }}
+                {{ form.unidade_saude_id(class="form-select" + (" is-invalid" if form.unidade_saude_id.errors else "")) }}
+                {% if form.unidade_saude_id.errors %}
+                    <div class="invalid-feedback d-block">
+                        {% for error in form.unidade_saude_id.errors %}<span>{{ error }}</span><br>{% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            {{ form.submit(class="btn btn-primary") }}
+            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary ms-2">Cancelar</a>
+        </div>
+    </form>
+{% endblock %}

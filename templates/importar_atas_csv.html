@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>{{ titulo_pagina if titulo_pagina else "Importar Atas e Itens de Arquivo CSV" }}</h2>
+    <hr class="my-4">
+
+    <div class="alert alert-warning" role="alert">
+        <h4 class="alert-heading">Atenção ao Formato do CSV!</h4>
+        <p>O arquivo CSV deve seguir uma estrutura específica para ser importado corretamente. Cada linha representa um <strong>item de uma ata</strong>. Se múltiplas linhas tiverem o mesmo "numero_ata", elas serão agrupadas sob a mesma ata.</p>
+        <hr>
+        <p class="mb-0"><strong>Codificação:</strong> O arquivo deve ser salvo em formato <strong>UTF-8</strong>.</p>
+        <p><strong>Cabeçalho:</strong> A primeira linha do arquivo <strong>deve conter os seguintes cabeçalhos</strong>, exatamente nesta ordem e com estes nomes:</p>
+        <code>numero_ata,ano_ata,descricao_ata,data_assinatura_ata,data_validade_ata,descricao_item,tipo_item,unidade_medida,quantidade_registrada,valor_unitario_registrado,lote</code>
+        <p class="mt-2"><strong>Formatos Especiais:</strong></p>
+        <ul>
+            <li><strong>Datas:</strong> Devem estar no formato <code>DD/MM/AAAA</code>.</li>
+            <li><strong>Valores e Quantidades:</strong> Use vírgula como separador decimal. Ex: <code>1500,50</code>. Não use separador de milhar.</li>
+            <li><strong>tipo_item:</strong> Deve ser um dos seguintes valores exatos: <code>MEDICAMENTO</code>, <code>MATERIAL_CONSUMO</code>, <code>EQUIPAMENTO</code>, <code>SERVICO</code>, <code>OUTRO</code>.</li>
+        </ul>
+    </div>
+
+    <form method="POST" action="" enctype="multipart/form-data" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="mb-3">
+            {{ form.csv_file.label(class="form-label") }}
+            {{ form.csv_file(class="form-control" + (" is-invalid" if form.csv_file.errors else "")) }}
+            {% if form.csv_file.errors %}
+                <div class="invalid-feedback d-block">
+                    {% for error in form.csv_file.errors %}<span>{{ error }}</span><br>{% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="mt-4">
+            {{ form.submit(class="btn btn-primary") }}
+            <a href="{{ url_for('index') }}" class="btn btn-secondary ms-2">Cancelar</a>
+        </div>
+    </form>
+{% endblock %}

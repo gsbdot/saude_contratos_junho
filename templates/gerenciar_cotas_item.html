@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Gerenciar Cotas por Unidade</h2>
+    <hr class="my-4">
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Item da Ata</h4>
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">{{ item.descricao_item }}</h5>
+            <p class="card-text">
+                <strong>Ata:</strong> {{ item.ata_mae.numero_ata }}/{{ item.ata_mae.ano }}<br>
+                <strong>Quantidade Total Registrada:</strong> <span id="total-registrado">{{ item.quantidade_registrada|format_quantity }}</span> {{ item.unidade_medida }}
+            </p>
+        </div>
+    </div>
+    
+    <form method="POST" action="" novalidate>
+        {{ form.hidden_tag() }}
+        
+        <div class="row">
+            <div class="col-md-8">
+                <p>Distribua a quantidade total do item entre as unidades de saúde. A soma das cotas não deve ultrapassar a quantidade total registrada.</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <h5>Soma das Cotas: <span id="soma-cotas" class="badge bg-primary">0,00</span></h5>
+            </div>
+        </div>
+        
+        <table class="table table-bordered mt-2">
+            <thead class="table-light">
+                <tr>
+                    <th>Unidade de Saúde</th>
+                    <th style="width: 200px;">Cota Prevista</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cota_subform in form.cotas %}
+                <tr>
+                    <td>
+                        {{ cota_subform.unidade_saude_id() }}
+                        <label for="{{ cota_subform.quantidade_prevista.id }}" class="form-label fw-bold">
+                            {{ unidades[loop.index0].nome_unidade }}
+                        </label>
+                    </td>
+                    <td>
+                        {{ cota_subform.quantidade_prevista(class="form-control cota-input", placeholder="0,00") }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="mt-4">
+            {{ form.submit(class="btn btn-primary btn-lg") }}
+            <a href="{{ url_for('listar_itens_da_ata', ata_id=item.ata_id) }}" class="btn btn-secondary btn-lg ms-2">Cancelar</a>
+        </div>
+    </form>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const cotaInputs = document.querySelectorAll('.cota-input');
+    const somaCotasSpan = document.getElementById('soma-cotas');
+    const totalRegistrado = parseFloat(document.getElementById('total-registrado').textContent.replace(',', '.'));
+
+    function calcularSoma() {
+        let soma = 0;
+        cotaInputs.forEach(input => {
+            const rawValue = input.value.replace('.', '').replace(',', '.');
+            const valor = parseFloat(rawValue) || 0;
+            soma += valor;
+        });
+        
+        somaCotasSpan.textContent = soma.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        
+        if (soma > totalRegistrado) {
+            somaCotasSpan.classList.remove('bg-primary', 'bg-success');
+            somaCotasSpan.classList.add('bg-danger');
+        } else if (Math.abs(soma - totalRegistrado) < 0.001) {
+            somaCotasSpan.classList.remove('bg-primary', 'bg-danger');
+            somaCotasSpan.classList.add('bg-success');
+        } else {
+            somaCotasSpan.classList.remove('bg-danger', 'bg-success');
+            somaCotasSpan.classList.add('bg-primary');
+        }
+    }
+
+    cotaInputs.forEach(input => {
+        input.addEventListener('input', calcularSoma);
+    });
+
+    // Calcula a soma inicial ao carregar a página
+    calcularSoma();
+});
+</script>
+{% endblock %}

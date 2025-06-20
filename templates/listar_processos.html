@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>{{ titulo_pagina if titulo_pagina else "Processos Administrativos" }}</h2>
+        {% if current_user.role in ['admin', 'gestor'] %}
+        <a href="{{ url_for('criar_processo') }}" class="btn btn-success">
+            <i class="fas fa-plus-circle"></i> Novo Processo
+        </a>
+        {% endif %}
+    </div>
+
+    {% if lista_de_processos %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover table-bordered table-sm">
+                <thead class="table-light">
+                    <tr>
+                        <th>Número/Ano</th>
+                        <th>Descrição/Objeto</th>
+                        <th class="text-center">Docs Vinculados</th>
+                        <th style="width: 15%; text-align: center;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for processo in lista_de_processos %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('visualizar_processo', processo_id=processo.id) }}">
+                                <strong>{{ processo.numero_processo }}/{{ processo.ano }}</strong>
+                            </a>
+                        </td>
+                        <td>{{ processo.descricao|truncate(80, True) if processo.descricao else '-' }}</td>
+                        <td class="text-center">
+                            {% set total_docs = processo.atas.count() + processo.contratos.count() + processo.contratinhos.count() + processo.empenhos.count() %}
+                            <span class="badge bg-secondary">{{ total_docs }}</span>
+                        </td>
+                        <td class="text-center table-actions">
+                            <a href="{{ url_for('visualizar_processo', processo_id=processo.id) }}" class="btn btn-outline-info btn-sm" title="Visualizar Detalhes">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            {% if current_user.role in ['admin', 'gestor'] %}
+                            <a href="{{ url_for('editar_processo', processo_id=processo.id) }}" class="btn btn-outline-primary btn-sm" title="Editar Processo">
+                                <i class="fas fa-pencil-alt"></i>
+                            </a>
+                            <a href="{{ url_for('excluir_processo', processo_id=processo.id) }}" class="btn btn-outline-danger btn-sm" title="Excluir Processo"
+                               onclick="return confirm('Tem certeza que deseja excluir o processo {{ processo.numero_processo }}/{{ processo.ano }}? Esta ação só é permitida se não houver NENHUM documento vinculado a ele.');">
+                               <i class="fas fa-trash-alt"></i>
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info mt-3">Nenhum processo administrativo registrado no momento.</div>
+    {% endif %}
+{% endblock %}

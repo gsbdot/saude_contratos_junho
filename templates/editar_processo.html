@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>{{ titulo_pagina if titulo_pagina else "Editar Processo" }}: {{ processo.numero_processo }}/{{ processo.ano }}</h2>
+    <hr class="my-4">
+    <form method="POST" action="" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                {{ form.numero_processo.label(class="form-label") }}
+                {{ form.numero_processo(class="form-control" + (" is-invalid" if form.numero_processo.errors else "")) }}
+                {% if form.numero_processo.errors %}
+                    <div class="invalid-feedback d-block">{% for error in form.numero_processo.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-6 mb-3">
+                {{ form.ano.label(class="form-label") }}
+                {{ form.ano(class="form-control" + (" is-invalid" if form.ano.errors else "")) }}
+                {% if form.ano.errors %}
+                    <div class="invalid-feedback d-block">{% for error in form.ano.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="mb-3">
+            {{ form.descricao.label(class="form-label") }}
+            {{ form.descricao(class="form-control" + (" is-invalid" if form.descricao.errors else ""), rows="4") }}
+            {% if form.descricao.errors %}
+                <div class="invalid-feedback d-block">{% for error in form.descricao.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
+            {% endif %}
+        </div>
+        
+        <div class="mt-4">
+            {{ form.submit(value="Salvar Alterações", class="btn btn-primary") }}
+            <a href="{{ url_for('listar_processos') }}" class="btn btn-secondary ms-2">Cancelar</a>
+        </div>
+    </form>
+{% endblock %}

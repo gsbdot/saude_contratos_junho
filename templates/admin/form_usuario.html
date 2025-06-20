@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>{{ titulo_pagina }}</h2>
+    <hr class="my-4">
+    <form method="POST" action="" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                {{ form.username.label(class="form-label") }}
+                {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else "")) }}
+                {% if form.username.errors %}
+                    <div class="invalid-feedback d-block">{% for error in form.username.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-6 mb-3">
+                {{ form.role.label(class="form-label") }}
+                {{ form.role(class="form-select" + (" is-invalid" if form.role.errors else "")) }}
+                {% if form.role.errors %}
+                    <div class="invalid-feedback d-block">{% for error in form.role.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                {{ form.password.label(class="form-label") }}
+                {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else "")) }}
+                {% if form.password.errors %}
+                     <div class="invalid-feedback d-block">{% for error in form.password.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
+                {% endif %}
+                {% if action == "edit" %}
+                    <div class="form-text">Deixe em branco para não alterar a senha.</div>
+                {% endif %}
+            </div>
+            <div class="col-md-6 mb-3">
+                {{ form.password2.label(class="form-label") }}
+                {{ form.password2(class="form-control" + (" is-invalid" if form.password2.errors else "")) }}
+                {% if form.password2.errors %}
+                     <div class="invalid-feedback d-block">{% for error in form.password2.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="mb-3">
+             {{ form.unidade_saude_id.label(class="form-label") }}
+             {{ form.unidade_saude_id(class="form-select" + (" is-invalid" if form.unidade_saude_id.errors else "")) }}
+             <div class="form-text">Vincule um usuário a uma unidade para futuras permissões de 'gestor'.</div>
+             {% if form.unidade_saude_id.errors %}
+                 <div class="invalid-feedback d-block">{% for error in form.unidade_saude_id.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
+             {% endif %}
+        </div>
+        
+        <div class="mt-4">
+            {{ form.submit(class="btn btn-primary") }}
+            <a href="{{ url_for('admin_listar_usuarios') }}" class="btn btn-secondary ms-2">Cancelar</a>
+        </div>
+    </form>
+{% endblock %}

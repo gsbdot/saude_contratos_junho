@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Detalhamento de Cotas por Unidade</h2>
+    <hr class="my-4">
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Item da Ata</h4>
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">{{ item.descricao_item }}</h5>
+            <p class="card-text mb-1">
+                <strong>Ata de Origem:</strong> <a href="{{ url_for('listar_itens_da_ata', ata_id=item.ata_id) }}">{{ item.ata_mae.numero_ata }}/{{ item.ata_mae.ano }}</a>
+            </p>
+            <div class="row">
+                <div class="col-md-4">
+                    <strong>Qtd. Total Registrada:</strong>
+                    <span class="badge bg-dark fs-6">{{ item.quantidade_registrada|format_quantity }}</span>
+                </div>
+                <div class="col-md-4">
+                    <strong>Total Alocado em Cotas:</strong>
+                    <span class="badge bg-info fs-6">{{ total_alocado|format_quantity }}</span>
+                </div>
+                <div class="col-md-4">
+                    <strong>Qtd. Não Alocada:</strong>
+                    <span class="badge bg-warning fs-6">{{ (item.quantidade_registrada - total_alocado)|format_quantity }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer text-end">
+            <a href="{{ url_for('gerenciar_cotas_item', item_id=item.id) }}" class="btn btn-primary btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16"><path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/><path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/></svg>
+                Editar Distribuição de Cotas
+            </a>
+        </div>
+    </div>
+
+    <h4>Consumo por Unidade</h4>
+
+    {% if cotas_info %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Unidade de Saúde</th>
+                        <th class="text-end">Cota Prevista</th>
+                        <th class="text-end">Qtd. Consumida</th>
+                        <th class="text-end">Saldo da Cota</th>
+                        <th style="width: 25%;">Progresso de Consumo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cota in cotas_info %}
+                    <tr>
+                        <td class="fw-bold">{{ cota.unidade_nome }}</td>
+                        <td class="text-end">{{ cota.previsto | format_quantity }}</td>
+                        <td class="text-end">{{ cota.consumido | format_quantity }}</td>
+                        <td class="text-end fw-bold {{ 'text-danger' if cota.saldo <= 0 }}">{{ cota.saldo | format_quantity }}</td>
+                        <td>
+                            {% if cota.progresso >= 0 %}
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar 
+                                    {% if cota.progresso > 90 %}bg-danger{% elif cota.progresso > 70 %}bg-warning{% else %}bg-success{% endif %}" 
+                                    role="progressbar" style="width: {{ cota.progresso }}%;" 
+                                    aria-valuenow="{{ cota.progresso }}" aria-valuemin="0" aria-valuemax="100">
+                                    {{ "%.1f"|format(cota.progresso) }}%
+                                </div>
+                            </div>
+                            {% else %}
+                            <span class="text-muted fst-italic">N/A</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            Nenhuma cota foi definida para este item. <a href="{{ url_for('gerenciar_cotas_item', item_id=item.id) }}" class="alert-link">Clique aqui para definir as cotas.</a>
+        </div>
+    {% endif %}
+
+    <div class="mt-4">
+        <a href="{{ url_for('listar_itens_da_ata', ata_id=item.ata_id) }}" class="btn btn-secondary">Voltar para a Lista de Itens</a>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <h2>{{ titulo_pagina if titulo_pagina else ("Itens da Ata: " + (ata.numero_ata if ata else "Desconhecida")) }}</h2>
+        {% if ata %}
+        <div class="btn-group">
+            {% if current_user.role in ['admin', 'gestor'] %}
+            <a href="{{ url_for('adicionar_itens_lote_ata', ata_id=ata.id) }}" class="btn btn-info">
+                <i class="fas fa-list-ol"></i> Adicionar Itens em Lote
+            </a>
+            <a href="{{ url_for('criar_item_ata', ata_id=ata.id) }}" class="btn btn-success ms-2">
+                <i class="fas fa-plus-circle"></i> Adicionar Item Individual
+            </a>
+            {% endif %}
+             {# --- BOTÃO ADICIONADO --- #}
+            <a href="{{ url_for('relatorio_detalhes_ata_pdf', ata_id=ata.id) }}" class="btn btn-danger ms-2" target="_blank">
+                <i class="fas fa-file-pdf"></i> Gerar PDF
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    
+    {% if ata %}
+    <div class="alert alert-secondary p-2">
+        <small>
+            <strong>Ata:</strong> {{ ata.numero_ata }}/{{ ata.ano }} <br>
+            <strong>Descrição:</strong> {{ ata.descricao|truncate(100, True) if ata.descricao else "N/A" }} <br>
+            <strong>Assinatura:</strong> {{ ata.data_assinatura.strftime('%d/%m/%Y') if ata.data_assinatura else "-" }} | 
+            <strong>Validade:</strong> {{ ata.data_validade.strftime('%d/%m/%Y') if ata.data_validade else "-" }}
+        </small>
+    </div>
+    {% endif %}
+
+    {% if itens_da_ata %}
+        <div class="table-responsive mt-3">
+            <table class="table table-striped table-hover table-bordered table-sm">
+                <thead class="table-light">
+                    <tr>
+                        <th>Descrição do Item</th>
+                        <th>Tipo</th>
+                        <th>Un.</th>
+                        <th class="text-end">Qtd. Reg.</th>
+                        <th class="text-end">Saldo Disp.</th>
+                        <th class="text-end">Vlr. Unit.</th>
+                        <th style="width: 20%; text-align: center;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in itens_da_ata %}
+                    <tr class="{{ 'table-danger' if item.saldo_disponivel is not none and item.saldo_disponivel <= 0 else ('table-warning' if item.quantidade_registrada > 0 and item.saldo_disponivel is not none and (item.saldo_disponivel / item.quantidade_registrada) * 100 <= config.PERCENTUAL_SALDO_BAIXO else '') }}">
+                        <td>{{ item.descricao_item|truncate(40,True) }}</td>
+                        <td>{{ tipo_item_display_map.get(item.tipo_item, item.tipo_item) }}</td>
+                        <td>{{ item.unidade_medida if item.unidade_medida else '-' }}</td>
+                        <td class="text-end">{{ item.quantidade_registrada | format_quantity }}</td>
+                        <td class="text-end fw-bold">{{ item.saldo_disponivel | format_quantity }}</td>
+                        <td class="text-end">{{ item.valor_unitario_registrado | br_currency }}</td>
+                        <td class="text-center table-actions">
+                             <a href="{{ url_for('visualizar_cotas_item', item_id=item.id) }}" class="btn btn-outline-success btn-sm" title="Visualizar Cotas">
+                                <i class="fas fa-chart-pie"></i>
+                            </a>
+                            {% if current_user.role in ['admin', 'gestor'] %}
+                            <a href="{{ url_for('gerenciar_cotas_item', item_id=item.id) }}" class="btn btn-outline-secondary btn-sm" title="Gerenciar Cotas por Unidade">
+                                <i class="fas fa-tasks"></i>
+                            </a>
+                            <a href="{{ url_for('editar_item_ata', ata_id=item.ata_id, item_id=item.id) }}" class="btn btn-outline-primary btn-sm" title="Editar Item">
+                                <i class="fas fa-pencil-alt"></i>
+                            </a>
+                            <a href="{{ url_for('excluir_item_ata', ata_id=item.ata_id, item_id=item.id) }}" class="btn btn-outline-danger btn-sm" title="Excluir Item"
+                               onclick="return confirm('Tem certeza que deseja excluir este item da ata?');">
+                               <i class="fas fa-trash-alt"></i>
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info mt-3">Nenhum item registrado para esta ata no momento.</div>
+    {% endif %}
+    <hr class="my-4">
+    <a href="{{ url_for('index') }}" class="btn btn-secondary btn-sm">Voltar para Lista de Atas</a>
+{% endblock %}

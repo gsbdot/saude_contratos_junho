@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+    <h2>{{ titulo_pagina }}</h2>
+    <a href="{{ url_for('listar_processos') }}" class="btn btn-secondary btn-sm">
+        <i class="fas fa-arrow-left"></i> Voltar para Lista de Processos
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h4><i class="fas fa-folder-open"></i> Processo: {{ processo.numero_processo }}/{{ processo.ano }}</h4>
+    </div>
+    <div class="card-body">
+        <p><strong>Descrição/Objeto:</strong></p>
+        <p class="text-muted" style="white-space: pre-wrap;">{{ processo.descricao if processo.descricao else "Nenhuma descrição fornecida." }}</p>
+    </div>
+</div>
+
+<hr class="my-4">
+
+<h4>Documentos Vinculados ao Processo</h4>
+
+{# Seção de Atas - REVERTIDO para .count() #}
+{% if processo.atas.count() > 0 %}
+<div class="card mb-3">
+    <div class="card-header bg-light">
+        <strong>Atas de Registro de Preço ({{ processo.atas.count() }})</strong>
+    </div>
+    <div class="list-group list-group-flush">
+        {% for ata in processo.atas %}
+            <a href="{{ url_for('listar_itens_da_ata', ata_id=ata.id) }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-file-alt text-primary me-2"></i>Ata nº {{ ata.numero_ata }}/{{ ata.ano }}</span>
+                <span class="badge bg-info rounded-pill">{{ ata.itens_ata|length }} itens</span>
+            </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{# Seção de Contratos - REVERTIDO para .count() #}
+{% if processo.contratos.count() > 0 %}
+<div class="card mb-3">
+    <div class="card-header bg-light">
+        <strong>Contratos ({{ processo.contratos.count() }})</strong>
+    </div>
+    <div class="list-group list-group-flush">
+        {% for contrato in processo.contratos %}
+            <a href="{{ url_for('visualizar_contrato', contrato_id=contrato.id) }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-file-contract text-success me-2"></i>Contrato nº {{ contrato.numero_contrato }}</span>
+                <span class="badge bg-success rounded-pill">{{ contrato.valor_global_contrato|br_currency }}</span>
+            </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{# Seção de Contratinhos - REVERTIDO para .count() #}
+{% if processo.contratinhos.count() > 0 %}
+<div class="card mb-3">
+    <div class="card-header bg-light">
+        <strong>Contratinhos ({{ processo.contratinhos.count() }})</strong>
+    </div>
+    <div class="list-group list-group-flush">
+        {% for ct in processo.contratinhos %}
+            <a href="{{ url_for('visualizar_contratinho', contratinho_id=ct.id) }}" class="list-group-item list-group-item-action">
+                <i class="fas fa-file-invoice text-warning me-2"></i>Contratinho nº {{ ct.numero_contratinho }}
+            </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{# Seção de Empenhos - REVERTIDO para .count() #}
+{% if processo.empenhos.count() > 0 %}
+<div class="card mb-3">
+    <div class="card-header bg-light">
+        <strong>Empenhos ({{ processo.empenhos.count() }})</strong>
+    </div>
+    <div class="list-group list-group-flush">
+        {% for empenho in processo.empenhos %}
+            <a href="{{ url_for('visualizar_empenho', empenho_id=empenho.id) }}" class="list-group-item list-group-item-action">
+                <i class="fas fa-money-check-alt text-danger me-2"></i>Empenho nº {{ empenho.numero_empenho }}
+            </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{# Verificação final - REVERTIDO para .count() #}
+{% if processo.atas.count() == 0 and processo.contratos.count() == 0 and processo.contratinhos.count() == 0 and processo.empenhos.count() == 0 %}
+    <div class="alert alert-info">Nenhum documento foi vinculado a este processo ainda.</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,27 @@
+# Ambiente Virtual
+venv/
+.venv/
+env/
+ENV/
+
+# Arquivos Python compilados e caches
+*.pyc
+__pycache__/
+
+# Arquivos de instância do Flask (se você usar)
+instance/
+
+# Arquivos de banco de dados SQLite (se não quiser versionar o DB)
+*.sqlite3
+saude_contratos.db 
+
+# Arquivos de IDEs e OS
+.vscode/
+.idea/
+*.DS_Store
+
+# Arquivos de dependências (se você tiver uma pasta local para elas)
+# node_modules/ 
+
+# Logs
+*.log

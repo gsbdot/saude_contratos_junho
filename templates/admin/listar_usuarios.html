@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>{{ titulo_pagina if titulo_pagina else "Gerenciar Usuários" }}</h2>
+        <a href="{{ url_for('admin_criar_usuario') }}" class="btn btn-success">
+            <i class="fas fa-user-plus"></i> Novo Usuário
+        </a>
+    </div>
+
+    {% if users %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover table-bordered table-sm">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nome de Usuário</th>
+                        <th>Nível (Role)</th>
+                        <th>Unidade Vinculada</th>
+                        <th style="width: 15%; text-align: center;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>
+                            <i class="fas fa-user"></i> {{ user.username }}
+                            {% if user.id == current_user.id %}<span class="badge bg-info ms-2">Você</span>{% endif %}
+                        </td>
+                        <td>
+                            {% if user.role == 'admin' %}
+                                <span class="badge bg-danger">Administrador</span>
+                            {% elif user.role == 'gestor' %}
+                                <span class="badge bg-warning text-dark">Gestor</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Leitura</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ user.unidade_saude.nome_unidade if user.unidade_saude else 'N/A' }}
+                        </td>
+                        <td class="text-center table-actions">
+                            <a href="{{ url_for('admin_editar_usuario', user_id=user.id) }}" class="btn btn-outline-primary btn-sm" title="Editar Usuário">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            {% if user.id != current_user.id %}
+                            <a href="{{ url_for('admin_excluir_usuario', user_id=user.id) }}" class="btn btn-outline-danger btn-sm" title="Excluir Usuário"
+                               onclick="return confirm('Tem certeza que deseja EXCLUIR o usuário \'{{ user.username }}\'? Esta ação não pode ser desfeita.');">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
+                            {% else %}
+                            <button class="btn btn-outline-secondary btn-sm" disabled title="Você não pode excluir a si mesmo">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info mt-3">Nenhum usuário encontrado.</div>
+    {% endif %}
+{% endblock %}

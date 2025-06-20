@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>{{ titulo_pagina if titulo_pagina else "Adicionar Múltiplos Itens à Ata" }}</h2>
+    {% if ata %}
+    <p class="lead">Para a Ata: <strong>{{ ata.numero_ata }}/{{ ata.ano }}</strong></p>
+    {% endif %}
+    <hr class="my-4">
+
+    <form method="POST" action="" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div id="itens-ata-container">
+            {% for item_s_form in form.itens_ata %}
+            <div class="item-ata-entry border rounded p-3 mb-3 shadow-sm">
+                <h5 class="mb-3">Item <span class="item-count">{{ loop.index }}</span></h5>
+                
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        {{ item_s_form.descricao_item.label(class="form-label") }}
+                        {{ item_s_form.descricao_item(class="form-control" + (" is-invalid" if item_s_form.descricao_item.errors else ""), placeholder="Descrição detalhada do item") }}
+                        {% if item_s_form.descricao_item.errors %}<div class="invalid-feedback d-block">{% for error in item_s_form.descricao_item.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        {{ item_s_form.tipo_item.label(class="form-label") }}
+                        {{ item_s_form.tipo_item(class="form-select tipo-item-select" + (" is-invalid" if item_s_form.tipo_item.errors else "")) }}
+                        {% if item_s_form.tipo_item.errors %}<div class="invalid-feedback d-block">{% for error in item_s_form.tipo_item.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        {{ item_s_form.unidade_medida.label(class="form-label") }}
+                        {{ item_s_form.unidade_medida(class="form-control" + (" is-invalid" if item_s_form.unidade_medida.errors else ""), placeholder="Ex: Un, Cx, Pc, Kg, M") }}
+                        {% if item_s_form.unidade_medida.errors %}<div class="invalid-feedback d-block">{% for error in item_s_form.unidade_medida.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        {{ item_s_form.lote.label(class="form-label") }}
+                        {{ item_s_form.lote(class="form-control" + (" is-invalid" if item_s_form.lote.errors else ""), placeholder="Lote do item (opcional)") }}
+                        {% if item_s_form.lote.errors %}<div class="invalid-feedback d-block">{% for error in item_s_form.lote.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="row">
+                     <div class="col-md-6 mb-3">
+                        {{ item_s_form.quantidade_registrada.label(class="form-label") }}
+                        {{ item_s_form.quantidade_registrada(class="form-control" + (" is-invalid" if item_s_form.quantidade_registrada.errors else ""), type="number", step="any", placeholder="0.00") }}
+                        {% if item_s_form.quantidade_registrada.errors %}<div class="invalid-feedback d-block">{% for error in item_s_form.quantidade_registrada.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ item_s_form.valor_unitario_registrado.label(class="form-label") }}
+                        {{ item_s_form.valor_unitario_registrado(class="form-control" + (" is-invalid" if item_s_form.valor_unitario_registrado.errors else ""), type="number", step="0.01", placeholder="0.00") }}
+                        {% if item_s_form.valor_unitario_registrado.errors %}<div class="invalid-feedback d-block">{% for error in item_s_form.valor_unitario_registrado.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+                    </div>
+                </div>
+
+                {# Campos de Garantia, Calibração e Reutilizável REMOVIDOS daqui #}
+
+                <div class="text-end">
+                    <button type="button" class="btn btn-danger btn-sm remove-item-btn mt-2">Remover este Item</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <button type="button" id="add-item-btn" class="btn btn-success btn-sm my-3">
+            <i class="fas fa-plus"></i> Adicionar Novo Item à Lista
+        </button>
+        
+        <hr class="my-4">
+        <div class="mt-4">
+            {{ form.submit(class="btn btn-primary btn-lg") }}
+            {% if ata %}
+            <a href="{{ url_for('listar_itens_da_ata', ata_id=ata.id) }}" class="btn btn-secondary btn-lg ms-2">Cancelar e Voltar</a>
+            {% else %}
+            <a href="{{ url_for('listar_atas') }}" class="btn btn-secondary btn-lg ms-2">Cancelar</a>
+            {% endif %}
+        </div>
+    </form>
+
+    <div id="item-ata-template" style="display: none;">
+        <div class="item-ata-entry border rounded p-3 mb-3 shadow-sm">
+            <h5 class="mb-3">Item <span class="item-count"></span></h5>
+            <div class="row">
+                <div class="col-md-12 mb-3">
+                    <label for="itens_ata-__prefix__-descricao_item" class="form-label">Descrição do Item</label>
+                    <input type="text" name="itens_ata-__prefix__-descricao_item" id="itens_ata-__prefix__-descricao_item" class="form-control" placeholder="Descrição detalhada do item">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="itens_ata-__prefix__-tipo_item" class="form-label">Tipo do Item</label>
+                    <select name="itens_ata-__prefix__-tipo_item" id="itens_ata-__prefix__-tipo_item" class="form-select tipo-item-select">
+                        {# As opções serão clonadas pelo JavaScript #}
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="itens_ata-__prefix__-unidade_medida" class="form-label">Unidade de Medida</label>
+                    <input type="text" name="itens_ata-__prefix__-unidade_medida" id="itens_ata-__prefix__-unidade_medida" class="form-control" placeholder="Ex: Un, Cx, Pc, Kg, M">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="itens_ata-__prefix__-lote" class="form-label">Lote</label>
+                    <input type="text" name="itens_ata-__prefix__-lote" id="itens_ata-__prefix__-lote" class="form-control" placeholder="Lote do item (opcional)">
+                </div>
+            </div>
+            <div class="row">
+                 <div class="col-md-6 mb-3">
+                    <label for="itens_ata-__prefix__-quantidade_registrada" class="form-label">Qtd. Registrada</label>
+                    <input type="number" step="any" name="itens_ata-__prefix__-quantidade_registrada" id="itens_ata-__prefix__-quantidade_registrada" class="form-control" placeholder="0.00">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="itens_ata-__prefix__-valor_unitario_registrado" class="form-label">Valor Unitário (R$)</label>
+                    <input type="number" step="0.01" name="itens_ata-__prefix__-valor_unitario_registrado" id="itens_ata-__prefix__-valor_unitario_registrado" class="form-control" placeholder="0.00">
+                </div>
+            </div>
+            {# Campos de Garantia, Calibração e Reutilizável REMOVIDOS daqui #}
+            <div class="text-end">
+                <button type="button" class="btn btn-danger btn-sm remove-item-btn mt-2">Remover este Item</button>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const itensContainer = document.getElementById('itens-ata-container');
+    const addItemButton = document.getElementById('add-item-btn');
+    const itemTemplateHtml = document.getElementById('item-ata-template').innerHTML;
+    const itemEntryClass = 'item-ata-entry';
+
+    if (!itensContainer || !addItemButton || !itemTemplateHtml) {
+        console.error('Elementos essenciais para itens dinâmicos da ata não encontrados.');
+        return;
+    }
+
+    let itemIndex = itensContainer.querySelectorAll('.' + itemEntryClass).length;
+    let tipoItemOptions = [];
+
+    const firstTipoItemSelect = itensContainer.querySelector('select.tipo-item-select');
+    if (firstTipoItemSelect) {
+        tipoItemOptions = Array.from(firstTipoItemSelect.options).map(opt => ({ value: opt.value, text: opt.text, selected: opt.selected }));
+    } else if (itemIndex === 0 && typeof form !== 'undefined' && form.itens_ata && typeof form.itens_ata.entries !== 'undefined' && form.itens_ata.entries.length > 0) {
+         // Este fallback é complexo e pode não ser necessário se min_entries=1 sempre renderiza um item com o select.
+         // Se 'form' não está disponível no JS global, esta parte não funcionará.
+         // A melhor abordagem é garantir que 'firstTipoItemSelect' capture o select inicial.
+         console.warn("Primeiro select 'tipo_item' não encontrado diretamente, verifique a renderização inicial do form.itens_ata[0].tipo_item.");
+    }
+
+
+    function updateItemCount() {
+        const items = itensContainer.querySelectorAll('.' + itemEntryClass);
+        items.forEach((item, idx) => {
+            const countSpan = item.querySelector('.item-count');
+            if (countSpan) {
+                countSpan.textContent = idx + 1;
+            }
+        });
+    }
+
+    function setupRemoveButtonListener(element) {
+        const removeButton = element.querySelector('.remove-item-btn');
+        if (removeButton) {
+            const newRemoveButton = removeButton.cloneNode(true);
+            removeButton.parentNode.replaceChild(newRemoveButton, removeButton);
+
+            newRemoveButton.addEventListener('click', function () {
+                if (itensContainer.querySelectorAll('.' + itemEntryClass).length <= 1) {
+                     alert('Pelo menos um item é necessário para a ata.');
+                     return;
+                }
+                this.closest('.' + itemEntryClass).remove();
+                updateItemCount();
+            });
+        }
+    }
+
+    addItemButton.addEventListener('click', function () {
+        const newItemHtml = itemTemplateHtml.replace(/__prefix__/g, itemIndex);
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = newItemHtml;
+        const newItemEntry = tempDiv.firstElementChild; 
+
+        const newTipoItemSelect = newItemEntry.querySelector('select.tipo-item-select');
+        if (newTipoItemSelect && tipoItemOptions.length > 0) {
+            tipoItemOptions.forEach(optData => {
+                const option = new Option(optData.text, optData.value, optData.selected, optData.selected);
+                newTipoItemSelect.add(option);
+            });
+            if (newTipoItemSelect.options.length > 1 && newTipoItemSelect.value === "") {
+                const firstRealOption = tipoItemOptions.find(o => o.value !== "");
+                if (firstRealOption) newTipoItemSelect.value = firstRealOption.value;
+                 else if (tipoItemOptions.length > 0) newTipoItemSelect.value = tipoItemOptions[0].value; // Default para a primeira opção se não houver "placeholder"
+            }
+        } else if (newTipoItemSelect) {
+            // Fallback se tipoItemOptions não foi populado (ex: nenhum item inicial no form)
+            // Você pode adicionar opções padrão aqui se necessário, ou buscar via AJAX.
+            // Por agora, deixaremos vazio ou com um placeholder, mas isso depende se o ItemAtaLoteSubForm.tipo_item
+            // tem choices default.
+            newTipoItemSelect.innerHTML = '<option value="">Configure opções no 1º item</option>';
+             {% if form.itens_ata and form.itens_ata[0] and form.itens_ata[0].tipo_item.choices %}
+                {% for value, label in form.itens_ata[0].tipo_item.choices %}
+                    // Isso é um pseudo-código Jinja dentro do JS, não funciona diretamente.
+                    // A melhor forma é clonar o select do primeiro item já renderizado.
+                {% endfor %}
+            {% endif %}
+        }
+
+
+        itensContainer.appendChild(newItemEntry);
+        setupRemoveButtonListener(newItemEntry);
+        updateItemCount();
+        itemIndex++;
+    });
+
+    itensContainer.querySelectorAll('.' + itemEntryClass).forEach(item => {
+        setupRemoveButtonListener(item);
+    });
+    
+    updateItemCount(); 
+});
+</script>
+{% endblock %}

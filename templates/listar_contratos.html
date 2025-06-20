@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>{{ titulo_pagina if titulo_pagina else "Lista de Contratos Clássicos" }}</h2>
+        {% if current_user.role in ['admin', 'gestor'] %}
+        <a href="{{ url_for('criar_contrato') }}" class="btn btn-success">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
+                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z"/>
+            </svg>
+            Novo Contrato
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="mb-3 d-flex justify-content-start align-items-center border-top border-bottom py-2">
+        <strong class="me-3">Mostrar:</strong>
+        <div class="btn-group btn-group-sm" role="group">
+            <a href="{{ url_for('listar_contratos', filtro='vigentes') }}" class="btn {% if filtro_ativo == 'vigentes' %}btn-primary{% else %}btn-outline-primary{% endif %}">Apenas Vigentes</a>
+            <a href="{{ url_for('listar_contratos', filtro='todos') }}" class="btn {% if filtro_ativo == 'todos' %}btn-primary{% else %}btn-outline-primary{% endif %}">Mostrar Todos</a>
+        </div>
+    </div>
+    {% if lista_de_contratos %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover table-bordered table-sm">
+                <thead class="table-light">
+                    <tr>
+                        <th>Número do Contrato</th>
+                        <th>Processo</th>
+                        <th>Objeto</th>
+                        <th>Fornecedor</th>
+                        <th>Itens</th>
+                        <th>Fim Vigência</th>
+                        <th style="width: 15%; text-align: center;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for contrato in lista_de_contratos %}
+                    <tr class="{{ 'table-secondary text-muted' if contrato.data_fim_vigencia and contrato.data_fim_vigencia.date() < today else '' }}">
+                        <td><a href="{{ url_for('visualizar_contrato', contrato_id=contrato.id) }}">{{ contrato.numero_contrato }}</a></td>
+                        <td>
+                            {% if contrato.processo %}
+                                <a href="{{ url_for('visualizar_processo', processo_id=contrato.processo.id) }}">{{ contrato.processo.numero_processo }}/{{ contrato.processo.ano }}</a>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>{{ contrato.objeto|truncate(50, True) }}</td>
+                        <td>{{ contrato.fornecedor|truncate(30,True) if contrato.fornecedor else '-' }}</td>
+                        <td>
+                            {% if contrato.itens_do_contrato and contrato.itens_do_contrato.count() > 0 %}
+                                {{ contrato.itens_do_contrato.count() }} item(ns)
+                            {% else %}
+                                <span class="text-muted fst-italic">Nenhum</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ contrato.data_fim_vigencia.strftime('%d/%m/%Y') if contrato.data_fim_vigencia else '-' }}</td>
+                        <td class="text-center table-actions">
+                            <a href="{{ url_for('visualizar_contrato', contrato_id=contrato.id) }}" class="btn btn-outline-info btn-sm" title="Visualizar Detalhes">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16"><path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/><path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg>
+                            </a>
+                            {% if current_user.role in ['admin', 'gestor'] %}
+                            <a href="{{ url_for('editar_contrato', contrato_id=contrato.id) }}" class="btn btn-outline-primary btn-sm" title="Editar Contrato">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16"><path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/><path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/></svg>
+                            </a>
+                            <a href="{{ url_for('excluir_contrato', contrato_id=contrato.id) }}" class="btn btn-outline-danger btn-sm" title="Excluir Contrato"
+                               onclick="return confirm('Tem certeza que deseja excluir este contrato? Esta ação não pode ser desfeita.');">
+                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16"><path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.024l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm3 0l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm3 .534l-.5 8.5a.5.5 0 1 0 .998.057l.5-8.5a.5.5 0 1 0-.998-.057Z"/></svg>
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info mt-3">
+            {% if filtro_ativo == 'vigentes' %}
+                Nenhum contrato vigente encontrado. <a href="{{ url_for('listar_contratos', filtro='todos') }}" class="alert-link">Clique aqui para ver todos os contratos, incluindo os vencidos.</a>
+            {% else %}
+                Nenhum contrato registrado no momento.
+            {% endif %}
+        </div>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ titulo_pagina|default("SGC Saúde") }} - Nova Friburgo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            padding-top: 70px;
+            padding-bottom: 60px; 
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        main.container {
+            flex: 1;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            border-top: 1px solid #e7e7e7;
+            padding: 20px 0;
+            width: 100%;
+        }
+        .table-actions a {
+            margin: 0 2px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('dashboard') }}">
+                <i class="fas fa-file-signature"></i> SGC-Saúde NF
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                {% if current_user.is_authenticated %}
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint.startswith('listar_processos') or request.endpoint.startswith('visualizar_processo') %}active{% endif %}" href="{{ url_for('listar_processos') }}">
+                            <i class="fas fa-folder-open"></i> Processos
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint.startswith('ata') or request.endpoint == 'index' or request.endpoint.startswith('listar_itens') %}active{% endif %}" href="{{ url_for('index') }}">
+                            <i class="fas fa-file-alt"></i> Atas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint.startswith('contrato') %}active{% endif %}" href="{{ url_for('listar_contratos') }}">
+                            <i class="fas fa-file-contract"></i> Contratos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint.startswith('contratinho') %}active{% endif %}" href="{{ url_for('listar_contratinhos') }}">
+                            <i class="fas fa-file-invoice"></i> Contratinhos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint.startswith('empenho') %}active{% endif %}" href="{{ url_for('listar_empenhos') }}">
+                            <i class="fas fa-money-check-alt"></i> Empenhos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint.startswith('unidade') %}active{% endif %}" href="{{ url_for('listar_unidades') }}">
+                           <i class="fas fa-hospital"></i> Unidades
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {% if request.endpoint.startswith('relatorio') %}active{% endif %}" href="#" id="navbarDropdownRelatorios" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-chart-bar"></i> Relatórios
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownRelatorios">
+                            <!-- MODIFICAÇÃO: LINK ADICIONADO -->
+                            <li><a class="dropdown-item" href="{{ url_for('relatorio_lista_processos_pdf') }}" target="_blank">Listagem de Processos (PDF)</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('relatorio_lista_atas_pdf') }}" target="_blank">Listagem de Todas as Atas (PDF)</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item {% if request.endpoint == 'relatorio_consumo_unidade' %}active{% endif %}" href="{{ url_for('relatorio_consumo_unidade') }}">Consumo por Unidade</a></li>
+                            <li><a class="dropdown-item {% if request.endpoint == 'relatorio_consumo_item' %}active{% endif %}" href="{{ url_for('relatorio_consumo_item') }}">Consumo por Item</a></li>
+                            <li><a class="dropdown-item {% if request.endpoint == 'relatorio_contratos_vigentes_unidade' %}active{% endif %}" href="{{ url_for('relatorio_contratos_vigentes_unidade') }}">Docs Vigentes por Unidade</a></li>
+                            <li><a class="dropdown-item {% if request.endpoint == 'relatorio_potencial_de_solicitacao' %}active{% endif %}" href="{{ url_for('relatorio_potencial_de_solicitacao') }}">Potencial de Solicitação por Unidade</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle"></i>
+                            {{ current_user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarUserDropdown">
+                            {% if current_user.role == 'admin' %}
+                            <li><a class="dropdown-item {% if request.endpoint == 'admin_listar_usuarios' %}active{% endif %}" href="{{ url_for('admin_listar_usuarios') }}"><i class="fas fa-users-cog"></i> Gerenciar Usuários</a></li>
+                            <li><a class="dropdown-item {% if request.endpoint == 'admin_visualizar_logs' %}active{% endif %}" href="{{ url_for('admin_visualizar_logs') }}"><i class="fas fa-history"></i> Logs de Atividade</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            {% endif %}
+                            <li><a class="dropdown-item" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout (Sair)</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mt-5 pt-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category if category in ['success', 'danger', 'warning', 'info'] else 'secondary' }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer mt-auto py-3 bg-light">
+        <div class="container text-center">
+            <span class="text-muted">&copy; {{ ano_atual }} Secretaria de Saúde - Nova Friburgo. Projeto Piloto.</span>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    {% block scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    {% endblock %}
+</body>
+</html>

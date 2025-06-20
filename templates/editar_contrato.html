@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>{{ titulo_pagina if titulo_pagina else "Editar Contrato Clássico" }}: {{ (contrato.numero_contrato if contrato else form.numero_contrato.data) if (contrato or form.numero_contrato.data) else contrato_id }}</h2>
+    <hr class="my-4">
+    <form method="POST" action="" novalidate id="formContratoClassico">
+        {{ form.hidden_tag() }}
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                {{ form.numero_contrato.label(class="form-label") }}
+                {{ form.numero_contrato(class="form-control" + (" is-invalid" if form.numero_contrato.errors else "")) }}
+                {% if form.numero_contrato.errors %}<div class="invalid-feedback d-block">{% for error in form.numero_contrato.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+            </div>
+             <div class="col-md-6 mb-3">
+                {{ form.unidade_saude_id.label(class="form-label") }}
+                {{ form.unidade_saude_id(class="form-select" + (" is-invalid" if form.unidade_saude_id.errors else "")) }}
+                {% if form.unidade_saude_id.errors %}<div class="invalid-feedback d-block">{% for error in form.unidade_saude_id.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            {{ form.processo_id.label(class="form-label") }}
+            {{ form.processo_id(class="form-select" + (" is-invalid" if form.processo_id.errors else "")) }}
+            {% if form.processo_id.errors %}<div class="invalid-feedback d-block">{% for error in form.processo_id.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.objeto.label(class="form-label") }}
+            {{ form.objeto(class="form-control" + (" is-invalid" if form.objeto.errors else ""), rows="3") }}
+            {% if form.objeto.errors %}<div class="invalid-feedback d-block">{% for error in form.objeto.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+        </div>
+
+        <div class="row">
+             <div class="col-md-12 mb-3">
+                {{ form.fornecedor.label(class="form-label") }}
+                {{ form.fornecedor(class="form-control" + (" is-invalid" if form.fornecedor.errors else "")) }}
+                {% if form.fornecedor.errors %}<div class="invalid-feedback d-block">{% for error in form.fornecedor.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                {{ form.data_assinatura_contrato.label(class="form-label") }}
+                {{ form.data_assinatura_contrato(class="form-control" + (" is-invalid" if form.data_assinatura_contrato.errors else "")) }}
+                {% if form.data_assinatura_contrato.errors %}<div class="invalid-feedback d-block">{% for error in form.data_assinatura_contrato.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+            </div>
+            <div class="col-md-4 mb-3">
+                {{ form.data_inicio_vigencia.label(class="form-label") }}
+                {{ form.data_inicio_vigencia(class="form-control" + (" is-invalid" if form.data_inicio_vigencia.errors else "")) }}
+                {% if form.data_inicio_vigencia.errors %}<div class="invalid-feedback d-block">{% for error in form.data_inicio_vigencia.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+            </div>
+            <div class="col-md-4 mb-3">
+                {{ form.data_fim_vigencia.label(class="form-label") }}
+                {{ form.data_fim_vigencia(class="form-control" + (" is-invalid" if form.data_fim_vigencia.errors else "")) }}
+                {% if form.data_fim_vigencia.errors %}<div class="invalid-feedback d-block">{% for error in form.data_fim_vigencia.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+            </div>
+        </div>
+        
+        <hr class="my-3">
+        <h5>Itens do Contrato (O Valor Global será a soma destes itens)</h5>
+        
+        <div id="itens-contratados-container">
+            {% for item_subform in form.itens_contratados %}
+                <div class="item-contrato-entry border rounded p-3 mb-3 shadow-sm">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6>Item <span class="item-count">{{ loop.index }}</span></h6>
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-item-btn">Remover</button>
+                    </div>
+                    <hr class="mt-0">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            {{ item_subform.descricao.label(class="form-label") }}
+                            {{ item_subform.descricao(class="form-control form-control-sm" + (" is-invalid" if item_subform.descricao.errors else "")) }}
+                            {% if item_subform.descricao.errors %}<div class="invalid-feedback d-block">{% for error in item_subform.descricao.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            {{ item_subform.unidade_medida.label(class="form-label") }}
+                            {{ item_subform.unidade_medida(class="form-control form-control-sm" + (" is-invalid" if item_subform.unidade_medida.errors else ""), placeholder="Ex: Un, Cx, Pc...") }}
+                            {% if item_subform.unidade_medida.errors %}<div class="invalid-feedback d-block">{% for error in item_subform.unidade_medida.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            {{ item_subform.quantidade.label(class="form-label") }}
+                            {{ item_subform.quantidade(class="form-control form-control-sm" + (" is-invalid" if item_subform.quantidade.errors else ""), type="text", placeholder="0,00") }}
+                            {% if item_subform.quantidade.errors %}<div class="invalid-feedback d-block">{% for error in item_subform.quantidade.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            {{ item_subform.valor_unitario.label(class="form-label") }}
+                            {{ item_subform.valor_unitario(class="form-control form-control-sm" + (" is-invalid" if item_subform.valor_unitario.errors else ""), type="text", placeholder="0,00") }}
+                            {% if item_subform.valor_unitario.errors %}<div class="invalid-feedback d-block">{% for error in item_subform.valor_unitario.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+         <button type="button" id="add-item-contrato-btn" class="btn btn-outline-success btn-sm mt-2 mb-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
+            Adicionar Item ao Contrato
+        </button>
+        
+        <div class="mt-4">
+            {{ form.submit(value="Salvar Alterações", class="btn btn-primary") }}
+            <a href="{{ url_for('listar_contratos') }}" class="btn btn-secondary ms-2">Cancelar</a>
+        </div>
+    </form>
+
+    <div id="item-contrato-template" style="display: none;">
+        <div class="item-contrato-entry border rounded p-3 mb-3 shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6>Item <span class="item-count"></span></h6>
+                <button type="button" class="btn btn-sm btn-outline-danger remove-item-btn">Remover</button>
+            </div>
+            <hr class="mt-0">
+            <div class="row">
+                <div class="col-md-12 mb-3">
+                    <label class="form-label" for="itens_contratados-__prefix__-descricao">Descrição do Item</label>
+                    <input type="text" name="itens_contratados-__prefix__-descricao" id="itens_contratados-__prefix__-descricao" class="form-control form-control-sm">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label" for="itens_contratados-__prefix__-unidade_medida">Unidade</label>
+                    <input type="text" name="itens_contratados-__prefix__-unidade_medida" id="itens_contratados-__prefix__-unidade_medida" class="form-control form-control-sm" placeholder="Ex: Un, Cx, Pc...">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label" for="itens_contratados-__prefix__-quantidade">Quantidade</label>
+                    <input type="text" name="itens_contratados-__prefix__-quantidade" id="itens_contratados-__prefix__-quantidade" class="form-control form-control-sm" placeholder="0,00">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label" for="itens_contratados-__prefix__-valor_unitario">Valor Unitário (R$)</label>
+                    <input type="text" name="itens_contratados-__prefix__-valor_unitario" id="itens_contratados-__prefix__-valor_unitario" class="form-control form-control-sm" placeholder="0,00">
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const container = document.getElementById('itens-contratados-container');
+    const addButton = document.getElementById('add-item-contrato-btn');
+    const template = document.getElementById('item-contrato-template').innerHTML;
+    const entryClass = 'item-contrato-entry';
+    const minEntries = 1;
+
+    function renumerarItens() {
+        const items = container.querySelectorAll('.' + entryClass);
+        items.forEach((item, index) => {
+            item.querySelector('.item-count').textContent = index + 1;
+        });
+    }
+
+    function atualizarVisibilidadeBotoesRemover() {
+        const items = container.querySelectorAll('.' + entryClass);
+        items.forEach(item => {
+            const removeBtn = item.querySelector('.remove-item-btn');
+            if (removeBtn) {
+                removeBtn.style.display = items.length > minEntries ? 'inline-block' : 'none';
+            }
+        });
+    }
+    
+    function adicionarItem() {
+        let count = container.querySelectorAll('.' + entryClass).length;
+        let novoHtml = template.replace(/__prefix__/g, count);
+        let novoElemento = document.createElement('div');
+        novoElemento.innerHTML = novoHtml;
+        container.appendChild(novoElemento.firstElementChild);
+        renumerarItens();
+        atualizarVisibilidadeBotoesRemover();
+    }
+
+    container.addEventListener('click', function (e) {
+        if (e.target && e.target.classList.contains('remove-item-btn')) {
+            if (container.querySelectorAll('.' + entryClass).length > minEntries) {
+                e.target.closest('.' + entryClass).remove();
+                renumerarItens();
+                atualizarVisibilidadeBotoesRemover();
+            } else {
+                alert('Todo contrato deve ter pelo menos ' + minEntries + ' item.');
+            }
+        }
+    });
+
+    addButton.addEventListener('click', adicionarItem);
+
+    // Inicialização
+    renumerarItens();
+    atualizarVisibilidadeBotoesRemover();
+});
+</script>
+{% endblock %}

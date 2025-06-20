@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>{{ titulo_pagina if titulo_pagina else ("Editar Item da Ata: " + (form.descricao_item.data if form.descricao_item.data else item_id)) }}</h2>
+    <h4 class="text-muted">Ata: {{ ata_numero if ata_numero else 'N/A' }}</h4>
+    <hr class="my-4">
+    <form method="POST" action="" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="mb-3">
+            {{ form.descricao_item.label(class="form-label") }}
+            {{ form.descricao_item(class="form-control" + (" is-invalid" if form.descricao_item.errors else "")) }}
+            {% if form.descricao_item.errors %}<div class="invalid-feedback d-block">{% for error in form.descricao_item.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.tipo_item.label(class="form-label") }}
+            {# O ID 'tipo_item_select' não é mais necessário aqui pois o JS de campos dinâmicos foi removido #}
+            {{ form.tipo_item(class="form-select" + (" is-invalid" if form.tipo_item.errors else "")) }}
+            {% if form.tipo_item.errors %}<div class="invalid-feedback d-block">{% for error in form.tipo_item.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                {{ form.unidade_medida.label(class="form-label") }}
+                {{ form.unidade_medida(class="form-control" + (" is-invalid" if form.unidade_medida.errors else ""), placeholder="Un, Cx, Pc...") }}
+                {% if form.unidade_medida.errors %}<div class="invalid-feedback d-block">{% for error in form.unidade_medida.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+            </div>
+            <div class="col-md-4 mb-3">
+                {{ form.quantidade_registrada.label(class="form-label") }} (Saldo Atual: {{ saldo_atual_item | format_quantity }})
+                {{ form.quantidade_registrada(class="form-control" + (" is-invalid" if form.quantidade_registrada.errors else ""), placeholder="0.00") }}
+                <small class="form-text text-muted">Alterar a quantidade aqui RECALCULARÁ o saldo disponível com base no consumo já existente. Cuidado!</small>
+                {% if form.quantidade_registrada.errors %}<div class="invalid-feedback d-block">{% for error in form.quantidade_registrada.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+            </div>
+            <div class="col-md-4 mb-3">
+                {{ form.valor_unitario_registrado.label(class="form-label") }}
+                {{ form.valor_unitario_registrado(class="form-control" + (" is-invalid" if form.valor_unitario_registrado.errors else ""), placeholder="0.00") }}
+                {% if form.valor_unitario_registrado.errors %}<div class="invalid-feedback d-block">{% for error in form.valor_unitario_registrado.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            {{ form.lote.label(class="form-label") }}
+            {{ form.lote(class="form-control" + (" is-invalid" if form.lote.errors else ""), placeholder="Lote (opcional)") }}
+            {% if form.lote.errors %}<div class="invalid-feedback d-block">{% for error in form.lote.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+        </div>
+
+        {# Campos de Garantia, Calibração e Reutilizável foram REMOVIDOS daqui #}
+        
+        <div class="mt-4">
+            {{ form.submit(value="Salvar Alterações no Item", class="btn btn-primary") }}
+            <a href="{{ url_for('listar_itens_da_ata', ata_id=ata_id_ref) }}" class="btn btn-secondary ms-2">Cancelar</a>
+        </div>
+    </form>
+{% endblock %}
+
+{# Bloco de scripts REMOVIDO pois o JS de campos dinâmicos não é mais necessário #}
+{# {% block scripts %}
+{{ super() }}
+<script>
+    // JavaScript para mostrar/ocultar campos foi removido
+</script>
+{% endblock %} #}

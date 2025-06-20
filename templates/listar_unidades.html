@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>{{ titulo_pagina if titulo_pagina else "Unidades de Saúde" }}</h2>
+        {% if current_user.role == 'admin' %}
+        <a href="{{ url_for('criar_unidade') }}" class="btn btn-success">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle-fill" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z"/></svg>
+            Nova Unidade
+        </a>
+        {% endif %}
+    </div>
+
+    {% if unidades %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover table-bordered table-sm">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nome da Unidade</th>
+                        <th>Tipo</th>
+                        <th>Endereço</th>
+                        <th>Telefone</th>
+                        <th>Email Responsável</th>
+                        {% if current_user.role == 'admin' %}
+                        <th style="width: 15%; text-align: center;">Ações</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for unidade in unidades %}
+                    <tr>
+                        <td>{{ unidade.nome_unidade }}</td>
+                        <td>{{ unidade_tipo_map.get(unidade.tipo_unidade, unidade.tipo_unidade) }}</td>
+                        <td>{{ unidade.endereco if unidade.endereco else '-' }}</td>
+                        <td>{{ unidade.telefone if unidade.telefone else '-' }}</td>
+                        <td>{{ unidade.email_responsavel if unidade.email_responsavel else '-' }}</td>
+                        {% if current_user.role == 'admin' %}
+                        <td class="text-center table-actions">
+                            <a href="{{ url_for('editar_unidade', unidade_id=unidade.id) }}" class="btn btn-outline-primary btn-sm" title="Editar Unidade">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16"><path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/><path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/></svg>
+                            </a>
+                            <a href="{{ url_for('excluir_unidade', unidade_id=unidade.id) }}" class="btn btn-outline-danger btn-sm" title="Excluir Unidade"
+                               onclick="return confirm('Tem certeza que deseja excluir esta Unidade de Saúde?');">
+                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16"><path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.024l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm3 0l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm3 .534l-.5 8.5a.5.5 0 1 0 .998.057l.5-8.5a.5.5 0 1 0-.998-.057Z"/></svg>
+                            </a>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info mt-3">Nenhuma Unidade de Saúde cadastrada no momento.</div>
+    {% endif %}
+{% endblock %}

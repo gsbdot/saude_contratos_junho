@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>{{ titulo_pagina if titulo_pagina else "Editar Empenho" }}: {{ (empenho.numero_empenho if empenho else form.numero_empenho.data) if (empenho or form.numero_empenho.data) else empenho_id }}</h2>
+    <hr class="my-4">
+    <form method="POST" action="" novalidate id="formEditarEmpenho">
+        {{ form.hidden_tag() }}
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                {{ form.numero_empenho.label(class="form-label") }}
+                {{ form.numero_empenho(class="form-control" + (" is-invalid" if form.numero_empenho.errors else "")) }}
+                {% if form.numero_empenho.errors %}<div class="invalid-feedback d-block">{% for error in form.numero_empenho.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+            </div>
+             <div class="col-md-6 mb-3">
+                {{ form.processo_id.label(class="form-label") }}
+                {{ form.processo_id(class="form-select" + (" is-invalid" if form.processo_id.errors else "")) }}
+                {% if form.processo_id.errors %}<div class="invalid-feedback d-block">{% for error in form.processo_id.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            {{ form.ata_id.label(class="form-label") }}
+            {{ form.ata_id(class="form-select" + (" is-invalid" if form.ata_id.errors else ""), id="selectAtaEmpenho") }}
+            {% if form.ata_id.errors %}<div class="invalid-feedback d-block">{% for error in form.ata_id.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+            <div id="descricao_ata_selecionada_div_empenho_editar" class="form-text text-muted mt-1"></div>
+        </div>
+
+        <div class="mb-3">
+            {{ form.descricao_simples.label(class="form-label") }}
+            {{ form.descricao_simples(class="form-control" + (" is-invalid" if form.descricao_simples.errors else ""), rows="3") }}
+            {% if form.descricao_simples.errors %}<div class="invalid-feedback d-block">{% for error in form.descricao_simples.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+        </div>
+
+        <div class="row">
+             <div class="col-md-6 mb-3">
+                {{ form.valor_total_manual.label(class="form-label") }}
+                {{ form.valor_total_manual(class="form-control" + (" is-invalid" if form.valor_total_manual.errors else "")) }}
+                {% if form.valor_total_manual.errors %}<div class="invalid-feedback d-block">{% for error in form.valor_total_manual.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+            </div>
+            <div class="col-md-6 mb-3">
+                {{ form.favorecido.label(class="form-label") }}
+                {{ form.favorecido(class="form-control" + (" is-invalid" if form.favorecido.errors else "")) }}
+                {% if form.favorecido.errors %}<div class="invalid-feedback d-block">{% for error in form.favorecido.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                {{ form.data_emissao.label(class="form-label") }}
+                {{ form.data_emissao(class="form-control" + (" is-invalid" if form.data_emissao.errors else "")) }}
+                {% if form.data_emissao.errors %}<div class="invalid-feedback d-block">{% for error in form.data_emissao.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+            </div>
+            <div class="col-md-6 mb-3">
+                {{ form.unidade_saude_id.label(class="form-label") }}
+                {{ form.unidade_saude_id(class="form-select" + (" is-invalid" if form.unidade_saude_id.errors else "")) }}
+                {% if form.unidade_saude_id.errors %}<div class="invalid-feedback d-block">{% for error in form.unidade_saude_id.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+            </div>
+        </div>
+
+        <hr class="my-3">
+        <h5>Itens Consumidos</h5>
+        
+        <div id="itens-consumidos-container-empenho-editar">
+            {% for item_subform_entry in form.itens_consumidos %}
+            <div class="item-consumido-bloco mb-4 p-3 border rounded bg-light">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">Item {{ loop.index }}</h6>
+                    <button type="button" class="btn btn-sm btn-outline-danger remove-item-empenho-btn">Remover</button>
+                </div>
+                <hr class="mt-2 mb-3">
+
+                <div class="row">
+                    <div class="col-md-8 mb-3">
+                        {{ item_subform_entry.form.item_ata_id.label(class="form-label") }}
+                        {{ item_subform_entry.form.item_ata_id(class="form-select item-ata-select-empenho" + (" is-invalid" if item_subform_entry.form.item_ata_id.errors else "")) }}
+                        {% if item_subform_entry.form.item_ata_id.errors %}<div class="invalid-feedback d-block">{% for error in item_subform_entry.form.item_ata_id.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        {{ item_subform_entry.form.quantidade_consumida.label(class="form-label") }}
+                        {{ item_subform_entry.form.quantidade_consumida(class="form-control" + (" is-invalid" if item_subform_entry.form.quantidade_consumida.errors else ""), step="any", placeholder="Qtd.") }}
+                        {% if item_subform_entry.form.quantidade_consumida.errors %}<div class="invalid-feedback d-block">{% for error in item_subform_entry.form.quantidade_consumida.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <button type="button" id="add-item-empenho-btn-editar" class="btn btn-success btn-sm mt-2 mb-3">Adicionar Item</button>
+
+        <div id="item-consumido-template-empenho-editar" style="display: none;">
+            <div class="item-consumido-bloco mb-4 p-3 border rounded bg-light">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">Novo Item</h6>
+                    <button type="button" class="btn btn-sm btn-outline-danger remove-item-empenho-btn">Remover</button>
+                </div>
+                <hr class="mt-2 mb-3">
+                <div class="row">
+                    <div class="col-md-8 mb-3">
+                        <label class="form-label" for="itens_consumidos-__prefix__-item_ata_id">Item da Ata</label>
+                        <select class="form-select item-ata-select-empenho" id="itens_consumidos-__prefix__-item_ata_id" name="itens_consumidos-__prefix__-item_ata_id">
+                            <option value="" selected>Selecione uma ata principal primeiro</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label" for="itens_consumidos-__prefix__-quantidade_consumida">Quantidade Consumida</label>
+                        <input class="form-control" id="itens_consumidos-__prefix__-quantidade_consumida" name="itens_consumidos-__prefix__-quantidade_consumida" step="any" type="number" placeholder="Qtd.">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            {{ form.submit(value="Salvar Alterações", class="btn btn-primary") }}
+            <a href="{{ url_for('listar_empenhos') }}" class="btn btn-secondary ms-2">Cancelar</a>
+        </div>
+    </form>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const mainAtaSelect = document.getElementById('selectAtaEmpenho'); 
+    const itensContainer = document.getElementById('itens-consumidos-container-empenho-editar'); 
+    const addItemButton = document.getElementById('add-item-empenho-btn-editar'); 
+    const itemTemplateHtml = document.getElementById('item-consumido-template-empenho-editar').innerHTML; 
+    const ataDescContainer = document.getElementById('descricao_ata_selecionada_div_empenho_editar'); 
+
+    if (!mainAtaSelect || !itensContainer || !addItemButton || !itemTemplateHtml) {
+        console.error('EDITAR EMPENHO: Um ou mais elementos essenciais do formulário dinâmico não foram encontrados.');
+        return;
+    }
+
+    let itemEntryClass = 'item-consumido-bloco'; 
+    let itemIndex = itensContainer.querySelectorAll('.' + itemEntryClass).length;
+
+    async function fetchAndDisplayAtaDescription(idAta) {
+        if (!idAta) {
+            if(ataDescContainer) ataDescContainer.innerHTML = '';
+            return;
+        }
+        try {
+            const response = await fetch(`/itens_da_ata_json/${idAta}`);
+            if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+            const data = await response.json();
+            if (data.ata_descricao && ataDescContainer) {
+                ataDescContainer.innerHTML = `<p class="form-text mb-0"><strong>Descrição da Ata:</strong> ${data.ata_descricao}</p>`;
+            } else if (ataDescContainer) {
+                ataDescContainer.innerHTML = '<p class="form-text text-muted mb-0">Descrição da ata não disponível.</p>';
+            }
+        } catch (error) {
+            console.error('Erro ao buscar descrição da ata:', error);
+            if (ataDescContainer) ataDescContainer.innerHTML = '<p class="form-text text-danger mb-0">Erro ao carregar descrição da ata.</p>';
+        }
+    }
+    
+    async function popularItensAtaSelect(selectElement, idAtaSelecionada) {
+        const valorOriginal = selectElement.value; 
+        selectElement.innerHTML = '<option value="">Carregando itens...</option>';
+        if (!idAtaSelecionada) {
+            selectElement.innerHTML = '<option value="">Selecione uma Ata Principal</option>';
+            return;
+        }
+        try {
+            const response = await fetch(`/itens_da_ata_json/${idAtaSelecionada}`);
+            if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+            const data = await response.json();
+            
+            selectElement.innerHTML = ''; 
+            if (data.itens && data.itens.length > 0) {
+                 data.itens.forEach(itemJson => { 
+                    const option = new Option(itemJson.text, itemJson.id); 
+                    selectElement.add(option);
+                });
+            } else {
+                selectElement.innerHTML = '<option value="">Nenhum item disponível</option>';
+            }
+            
+            if (Array.from(selectElement.options).some(opt => opt.value == valorOriginal)) {
+                selectElement.value = valorOriginal;
+            } else {
+                 selectElement.value = ""; 
+            }
+
+        } catch (error) {
+            console.error('Erro ao buscar itens da ata:', error);
+            selectElement.innerHTML = '<option value="">Erro ao carregar itens</option>';
+        }
+    }
+
+    function setupRemoveButton(button) {
+        button.addEventListener('click', function () {
+            if (itensContainer.querySelectorAll('.' + itemEntryClass).length <= 1) {
+                 alert('Pelo menos um item é necessário para o empenho.');
+                 return;
+            }
+            this.closest('.' + itemEntryClass).remove();
+            renumerarItensVisualmente();
+            atualizarVisibilidadeBotoesRemover();
+        });
+    }
+    
+    addItemButton.addEventListener('click', function () {
+        const idAtaPrincipal = mainAtaSelect.value;
+        if (!idAtaPrincipal) {
+            alert('Por favor, selecione uma Ata principal primeiro.');
+            mainAtaSelect.focus();
+            return;
+        }
+
+        const novoHtml = itemTemplateHtml.replace(/__prefix__/g, itemIndex);
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = novoHtml;
+        const actualItemEntry = tempDiv.firstElementChild;
+        
+        if (!actualItemEntry) {
+            console.error("EDITAR EMPENHO: Estrutura do template de item está incorreta.");
+            return;
+        }
+        
+        itensContainer.appendChild(actualItemEntry);
+        
+        const novoItemAtaSelect = actualItemEntry.querySelector('select.item-ata-select-empenho');
+        if (novoItemAtaSelect) {
+            popularItensAtaSelect(novoItemAtaSelect, idAtaPrincipal);
+        }
+
+        const newRemoveButton = actualItemEntry.querySelector('.remove-item-empenho-btn');
+        if(newRemoveButton) setupRemoveButton(newRemoveButton);
+        
+        itemIndex++;
+        renumerarItensVisualmente();
+        atualizarVisibilidadeBotoesRemover();
+    });
+
+    function renumerarItensVisualmente() {
+        const items = itensContainer.querySelectorAll('.' + itemEntryClass);
+        items.forEach((item, idx) => {
+            const h6 = item.querySelector('h6');
+            if(h6) h6.textContent = `Item ${idx + 1}`;
+        });
+    }
+    
+    function atualizarVisibilidadeBotoesRemover() {
+        const items = itensContainer.querySelectorAll('.' + itemEntryClass);
+        const minEntries = 1; 
+        items.forEach(item => {
+            const removeBtn = item.querySelector('.remove-item-empenho-btn');
+            if (removeBtn) {
+                removeBtn.style.display = items.length > minEntries ? 'inline-block' : 'none';
+            }
+        });
+    }
+
+    itensContainer.querySelectorAll('.' + itemEntryClass).forEach(existingItemEntry => {
+        const removeButton = existingItemEntry.querySelector('.remove-item-btn');
+        if(removeButton) setupRemoveButton(removeButton);
+    });
+    renumerarItensVisualmente();
+    atualizarVisibilidadeBotoesRemover();
+
+    if (mainAtaSelect.value) {
+        fetchAndDisplayAtaDescription(mainAtaSelect.value);
+        itensContainer.querySelectorAll('select.item-ata-select-empenho').forEach(itemAtaSelect => {
+            popularItensAtaSelect(itemAtaSelect, mainAtaSelect.value);
+        });
+    }
+    
+    mainAtaSelect.addEventListener('change', function() {
+        const idAtaSelecionada = this.value;
+        fetchAndDisplayAtaDescription(idAtaSelecionada);
+        
+        const confirma = confirm("Mudar a Ata Principal pode invalidar os itens já selecionados se eles não pertencerem à nova Ata. Deseja continuar e atualizar a lista de itens para todos os campos?");
+        if (confirma) {
+            itensContainer.querySelectorAll('select.item-ata-select-empenho').forEach(select => {
+                 popularItensAtaSelect(select, idAtaSelecionada);
+            });
+        } else {
+            alert("Atenção: A Ata Principal foi alterada, mas os itens não foram automaticamente atualizados. Verifique cada item ou adicione novos itens da ata correta.");
+        }
+    });
+});
+</script>
+{% endblock %}

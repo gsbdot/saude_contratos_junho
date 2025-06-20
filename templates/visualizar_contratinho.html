@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">{{ titulo_pagina }}</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{{ url_for('relatorio_detalhes_contratinho', contratinho_id=contratinho.id) }}" class="btn btn-sm btn-outline-danger me-2" target="_blank">
+            <i class="fas fa-file-pdf"></i> Gerar PDF
+        </a>
+        {% if current_user.role in ['admin', 'gestor'] %}
+        <a href="{{ url_for('editar_contratinho', contratinho_id=contratinho.id) }}" class="btn btn-sm btn-outline-primary">
+            <i class="fas fa-pencil-alt"></i> Editar
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5><i class="fas fa-info-circle"></i> Dados Gerais do Contratinho</h5>
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Número/Documento</dt>
+            <dd class="col-sm-9">{{ contratinho.numero_contratinho }}</dd>
+
+            <dt class="col-sm-3">Processo Vinculado</dt>
+            <dd class="col-sm-9">
+                {% if contratinho.processo %}
+                    <a href="{{ url_for('visualizar_processo', processo_id=contratinho.processo.id) }}">{{ contratinho.processo.numero_processo }}/{{ contratinho.processo.ano }}</a>
+                {% else %}
+                    <span class="text-muted">Nenhum</span>
+                {% endif %}
+            </dd>
+
+            <dt class="col-sm-3">Ata Vinculada</dt>
+            <dd class="col-sm-9"><a href="{{ url_for('listar_itens_da_ata', ata_id=contratinho.ata_vinculada.id) }}">{{ contratinho.ata_vinculada.numero_ata }}/{{ contratinho.ata_vinculada.ano }}</a></dd>
+
+            <dt class="col-sm-3">Objeto</dt>
+            <dd class="col-sm-9">{{ contratinho.objeto if contratinho.objeto else "-" }}</dd>
+
+            <dt class="col-sm-3">Favorecido</dt>
+            <dd class="col-sm-9">{{ contratinho.favorecido if contratinho.favorecido else "-" }}</dd>
+
+            <dt class="col-sm-3">Unidade de Destino</dt>
+            <dd class="col-sm-9">{{ contratinho.unidade_saude_solicitante.nome_unidade if contratinho.unidade_saude_solicitante else "Não especificada" }}</dd>
+            
+            <dt class="col-sm-3">Data de Emissão</dt>
+            <dd class="col-sm-9">{{ contratinho.data_emissao.strftime('%d/%m/%Y') if contratinho.data_emissao else "-" }}</dd>
+            
+            <dt class="col-sm-3">Fim da Vigência</dt>
+            <dd class="col-sm-9">{{ contratinho.data_fim_vigencia.strftime('%d/%m/%Y') if contratinho.data_fim_vigencia else "-" }}</dd>
+        </dl>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5><i class="fas fa-shopping-cart"></i> Itens Consumidos (Valor Total: {{ contratinho.valor_total_itens|br_currency }})</h5>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-sm table-striped table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Item da Ata</th>
+                    <th>Tipo</th>
+                    <th class="text-end">Qtd. Consumida</th>
+                    <th class="text-end">V.U. no Consumo</th>
+                    <th class="text-end">Valor Total do Item</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for consumo in contratinho.itens_consumidos %}
+                <tr>
+                    <td>{{ consumo.item_ata_consumido.descricao_item }}</td>
+                    <td>{{ tipo_item_display_map.get(consumo.item_ata_consumido.tipo_item, consumo.item_ata_consumido.tipo_item) }}</td>
+                    <td class="text-end">{{ consumo.quantidade_consumida|format_quantity }}</td>
+                    <td class="text-end">{{ consumo.valor_unitario_no_consumo|br_currency }}</td>
+                    <td class="text-end">{{ consumo.valor_total_consumido_item|br_currency }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted">Nenhum item consumido neste documento.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{# Inclusão do template de comentários #}
+{% with documento=contratinho %}
+    {% include '_comentarios.html' %}
+{% endwith %}
+
+<hr>
+<a href="{{ url_for('listar_contratinhos') }}" class="btn btn-secondary mt-3">Voltar para a Lista de Contratinhos</a>
+
+{% endblock %}
